@@ -541,7 +541,7 @@
     aside{display:flex;flex-direction:column;gap:12px;padding-top:110px;align-self:start;} 
 
 .check-panel{position:sticky;top:8px;z-index:3;margin-bottom:22px;} 
-.check-panel .btn-primary{width:100%;min-height:60px;font-size:20px;box-shadow:0 10px 24px rgba(0,0,0,0.18);background:#dc2626;color:white;} .check-panel .btn-primary.pulse{animation:checkPulse 900ms ease-in-out infinite;} 
+.check-panel .btn-primary{width:100%;min-height:60px;font-size:20px;box-shadow:0 10px 24px rgba(0,0,0,0.18);background:#dc2626;color:white;} .check-panel .btn-primary.pulse{animation:checkPulse 900ms ease-in-out infinite;} .check-panel .btn-primary.touch-press{transform:scale(0.97);box-shadow:0 4px 12px rgba(0,0,0,0.16), inset 0 2px 6px rgba(255,255,255,0.12);}  
 @keyframes checkPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);box-shadow:0 0 0 6px rgba(220,38,38,0.25),0 10px 24px rgba(0,0,0,0.18);} }
 .check-panel .btn-primary:hover{background:#b91c1c;} .check-panel .btn-primary:active{background:#991b1b;} 
 
@@ -1481,7 +1481,35 @@ aside section:last-child{margin-top:auto;}
       e.stopPropagation();
       moveMarkerToStart();
     });
-    els.checkButton.addEventListener("click", checkAnswer);
+    // Ensure Check Answer works once per tap on desktop and iPad / touch devices
+    let lastCheckActivation = 0;
+    const activateCheckAnswer = (e) => {
+      if (e) {
+        e.preventDefault();
+      }
+      const now = Date.now();
+      if (now - lastCheckActivation < 350) return;
+      lastCheckActivation = now;
+      els.checkButton.classList.remove("touch-press");
+      checkAnswer();
+    };
+
+    els.checkButton.addEventListener("click", activateCheckAnswer);
+    els.checkButton.addEventListener("touchstart", () => {
+      els.checkButton.classList.add("touch-press");
+    }, { passive: true });
+    els.checkButton.addEventListener("touchend", activateCheckAnswer);
+    els.checkButton.addEventListener("touchcancel", () => {
+      els.checkButton.classList.remove("touch-press");
+    });
+    els.checkButton.addEventListener("pointerdown", () => {
+      els.checkButton.classList.add("touch-press");
+    });
+    els.checkButton.addEventListener("pointerup", activateCheckAnswer);
+    els.checkButton.addEventListener("pointercancel", () => {
+      els.checkButton.classList.remove("touch-press");
+    });
+
     els.skipButton.addEventListener("click", () => newProblem());
     els.resetButton.addEventListener("click", resetGame);
     els.fiveModeBtn.addEventListener("click", () => setFrameMode("five"));
