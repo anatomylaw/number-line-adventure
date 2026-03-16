@@ -545,9 +545,6 @@
 @keyframes checkPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);box-shadow:0 0 0 6px rgba(220,38,38,0.25),0 10px 24px rgba(0,0,0,0.18);} }
 .check-panel .btn-primary:hover{background:#b91c1c;} .check-panel .btn-primary:active{background:#991b1b;} 
 
-/* push classroom features panel to bottom */
-aside section:last-child{margin-top:auto;}
-
 .switch-row {
       display: flex;
       justify-content: space-between;
@@ -1536,8 +1533,33 @@ aside section:last-child{margin-top:auto;}
       els.checkButton.classList.remove("touch-press");
     });
 
-    els.skipButton.addEventListener("click", () => newProblem());
-    els.resetButton.addEventListener("click", resetGame);
+    let lastSkipActivation = 0;
+    const activateSkip = (e) => {
+      if (e) e.preventDefault();
+      const now = Date.now();
+      if (now - lastSkipActivation < 350) return;
+      lastSkipActivation = now;
+      newProblem();
+    };
+
+    let lastResetActivation = 0;
+    const activateReset = (e) => {
+      if (e) e.preventDefault();
+      const now = Date.now();
+      if (now - lastResetActivation < 350) return;
+      lastResetActivation = now;
+      resetGame();
+    };
+
+    els.skipButton.addEventListener("click", activateSkip);
+    els.skipButton.addEventListener("pointerup", activateSkip);
+    els.skipButton.addEventListener("touchend", activateSkip);
+    els.skipButton.addEventListener("touchcancel", () => {});
+
+    els.resetButton.addEventListener("click", activateReset);
+    els.resetButton.addEventListener("pointerup", activateReset);
+    els.resetButton.addEventListener("touchend", activateReset);
+    els.resetButton.addEventListener("touchcancel", () => {});
     els.fiveModeBtn.addEventListener("click", () => setFrameMode("five"));
     els.tenModeBtn.addEventListener("click", () => setFrameMode("ten"));
     els.fiveModeBtnSide.addEventListener("click", () => setFrameMode("five"));
