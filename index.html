@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<!--
+GitHub Pages Ready
+------------------
+1. Create a new GitHub repository (for example: number-line-adventure)
+2. Upload this file and name it: index.html
+3. Go to Settings → Pages
+4. Set Source: Deploy from branch → main → /(root)
+5. Your game will appear at:
+   https://YOUR-USERNAME.github.io/number-line-adventure/
+6. On iPad: open the link in Safari → Share → Add to Home Screen
+-->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number Line Adventure</title>
+
+  <!-- PWA / iPad app support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Number Line Adventure">
+  <meta name="theme-color" content="#0f172a">
+
+  <link rel="manifest" id="dynamic-manifest">
+  <style>
+    :root {
+      --sky-50: #f0f9ff;
+      --sky-100: #e0f2fe;
+      --sky-300: #7dd3fc;
+      --sky-700: #0369a1;
+      --amber-50: #fffbeb;
+      --amber-300: #fcd34d;
+      --amber-400: #fbbf24;
+      --emerald-50: #ecfdf5;
+      --emerald-400: #34d399;
+      --emerald-700: #047857;
+      --purple-50: #faf5ff;
+      --purple-100: #f3e8ff;
+      --purple-300: #d8b4fe;
+      --purple-400: #c084fc;
+      --purple-500: #a855f7;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-900: #0f172a;
+      --white: #ffffff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.06);
+      --radius-xl: 20px;
+      --radius-2xl: 28px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom, var(--sky-50), var(--white), var(--amber-50));
+      color: var(--slate-900);
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--sky-100);
+      color: var(--sky-700);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 40px; line-height: 1.05; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 20px; }
+    .muted { color: var(--slate-500); }
+    .subtle { color: var(--slate-600); }
+    .small { font-size: 14px; }
+    .tiny { font-size: 12px; }
+
+    .trophy-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      background: var(--amber-50);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .emoji {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .challenge {
+      margin-top: 16px;
+      background: var(--slate-50);
+      border-radius: var(--radius-2xl);
+      padding: 28px;
+      text-align: center;
+      box-shadow: inset 0 2px 12px rgba(15, 23, 42, 0.04);
+    }
+
+    .problem {
+      margin-top: 12px;
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      background: var(--white);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: var(--shadow-sm);
+      font-size: 14px;
+      color: var(--slate-600);
+    }
+
+    .section {
+      margin-top: 20px;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-2xl);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    button {
+      border: none;
+      border-radius: 18px;
+      padding: 16px 22px;
+      min-height: 52px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.12s ease, background 0.2s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    .btn-primary { background: var(--slate-900); color: white; }
+    .btn-secondary { background: var(--slate-100); color: var(--slate-900); }
+    .btn-outline { background: white; color: var(--slate-900); border: 1px solid var(--slate-300); }
+    .btn-chip { background: white; color: var(--slate-700); padding: 10px 14px; min-height: 44px; border-radius: 999px; border: 1px solid var(--slate-200); }
+    .btn-chip.active { background: var(--slate-900); color: white; border-color: var(--slate-900); }
+
+    .line-wrap {
+      position: relative;
+      padding: 28px 8px 46px;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .line {
+      position: relative;
+      height: 104px;
+      cursor: pointer;
+    }
+
+    .line-track {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 36px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--slate-200);
+    }
+
+    .line-fill {
+      position: absolute;
+      left: 0;
+      top: 36px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--sky-300);
+    }
+
+    .tick {
+      position: absolute;
+      top: 14px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tick-mark {
+      width: 3px;
+      height: 32px;
+      background: var(--slate-400);
+      border-radius: 99px;
+    }
+
+    .tick-label {
+      margin-top: 8px;
+      font-size: 18px;
+      color: var(--slate-700);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .marker {
+      position: absolute;
+      top: -2px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+      cursor: grab;
+      transition: left 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+      touch-action: none;
+    }
+
+    .marker.dragging { cursor: grabbing; }
+
+    /* Soft glow to help track the marker while dragging (ADHD-friendly visual cue) */
+    .marker.dragging .star {
+      box-shadow:
+        0 0 0 6px rgba(125, 211, 252, 0.35),
+        0 0 22px rgba(125, 211, 252, 0.6),
+        0 8px 18px rgba(251, 191, 36, 0.42);
+      transform: scale(1.05);
+      transition: box-shadow 0.1s ease, transform 0.1s ease;
+    }
+    .marker.bounce { animation: bounce 0.45s ease 2; }
+
+    /* Snap pulse when marker lands exactly on a number */
+    .marker.snap .star {
+      animation: snapPulse 220ms ease;
+    }
+
+    .star {
+      width: 58px;
+      height: 58px;
+      border-radius: 999px;
+      background: var(--amber-400);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      box-shadow: 0 8px 18px rgba(251, 191, 36, 0.42);
+    }
+
+    .stem {
+      margin-top: 4px;
+      width: 8px;
+      height: 30px;
+      border-radius: 99px;
+      background: var(--amber-400);
+    }
+
+    .hint {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: var(--sky-50);
+      color: var(--sky-700);
+      font-size: 14px;
+    }
+
+    .jumps {
+      margin-top: 16px;
+      background: var(--emerald-50);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .jump-line {
+      position: relative;
+      height: 72px;
+      overflow: hidden;
+      border-radius: 16px;
+      background: white;
+      margin-top: 10px;
+    }
+
+    .jump-base {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 44px;
+      height: 4px;
+      border-radius: 99px;
+      background: #d1fae5;
+    }
+
+    .jump-arc {
+      position: absolute;
+      top: 6px;
+      height: 40px;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: arcIn 0.35s ease forwards;
+    }
+
+    .visualizer {
+      margin-top: 16px;
+      background: var(--purple-50);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .toggle-group {
+      display: inline-flex;
+      gap: 6px;
+      background: white;
+      padding: 4px;
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .frame-grid {
+      margin-top: 14px;
+      display: grid;
+      gap: 6px;
+      max-width: 420px;
+    }
+
+    .frame-cell {
+      height: 32px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f8fafc;
+      transition: transform 0.12s ease, background 0.2s ease, border 0.2s ease;
+    }
+
+    .frame-cell.filled-a {
+      background: #d1d5db;
+      border-color: #9ca3af;
+    }
+
+    .frame-cell.filled-b {
+      background: #dc2626;
+      border-color: #b91c1c;
+    }
+
+    .feedback {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: var(--radius-2xl);
+      background: linear-gradient(to right, #ecfdf5, #fefce8);
+      border: 1px solid var(--slate-200);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .feedback.pop { animation: pop 0.35s ease; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .stat-box {
+      background: var(--slate-50);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .stat-value {
+      margin-top: 6px;
+      font-size: 36px;
+      font-weight: 800;
+    }
+
+    .progress-track {
+      margin-top: 10px;
+      height: 14px;
+      background: var(--slate-200);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+    }
+
+    .progress-segment {
+      height: 100%;
+      flex: 1;
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      transform: scaleY(0.6);
+    }
+
+    .progress-segment.filled {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+
+    .progress-segment.pop-in {
+      animation: segmentPop 260ms ease;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: var(--slate-900);
+      transition: width 0.25s ease;
+    }
+
+    .progress-stars, .guide, .settings-box, .encouragement {
+      border-radius: 18px;
+      padding: 16px;
+      background: var(--slate-50);
+    }
+
+    .progress-stars { background: var(--amber-50); }
+    .guide { background: var(--amber-50); }
+    .encouragement { background: var(--sky-50); color: var(--sky-700); }
+
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      background: var(--slate-50);
+      border-radius: 18px;
+      padding: 14px 16px;
+    }
+
+    .switch-row + .switch-row, .switch-row + .settings-box, .settings-box + .encouragement {
+      margin-top: 12px;
+    }
+
+    .switch {
+      width: 52px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--slate-300);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      flex: 0 0 auto;
+    }
+
+    .switch.on { background: var(--slate-900); }
+    .switch-knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: white;
+      transition: transform 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    }
+
+    .switch.on .switch-knob { transform: translateX(22px); }
+
+    .confetti-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 50;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      width: 12px;
+      height: 18px;
+      border-radius: 4px;
+      opacity: 0.95;
+      animation: confettiFly 1800ms ease-out forwards;
+      will-change: transform, opacity;
+    }
+
+    .star-flash {
+      position: absolute;
+      font-size: 28px;
+      animation: starFlash 900ms ease-out forwards;
+      pointer-events: none;
+    }
+
+    .tick.start-focus .tick-mark,
+    .tick.start-focus .tick-label {
+      background: #60a5fa;
+      color: #ffffff;
+    }
+
+    .tick.start-focus .tick-mark {
+      width: 4px;
+      box-shadow: 0 0 0 6px rgba(96, 165, 250, 0.18);
+    }
+
+    .tick.answer-focus .tick-mark,
+    .tick.answer-focus .tick-label {
+      background: #fbbf24;
+      color: #b45309;
+    }
+
+    .tick.answer-focus .tick-mark {
+      width: 4px;
+    }
+
+    .tick.answer-focus.pulse .tick-mark,
+    .tick.answer-focus.pulse .tick-label {
+      animation: answerPulse 1s ease-in-out infinite;
+    }
+
+    body.focus-mode aside,
+    body.focus-mode .hint,
+    body.focus-mode .jumps,
+    body.focus-mode .visualizer,
+    body.focus-mode .badge,
+    body.focus-mode .subtle,
+    body.focus-mode #confettiLayer {
+      display: none !important;
+    }
+
+    body.focus-mode .layout {
+      max-width: 860px;
+      grid-template-columns: 1fr;
+    }
+
+    body.focus-mode .card {
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-12px); }
+    }
+
+    @keyframes snapPulse {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.18); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes segmentPop {
+      0% { transform: scaleY(0.45) scaleX(0.92); }
+      55% { transform: scaleY(1.18) scaleX(1.03); }
+      100% { transform: scaleY(1) scaleX(1); }
+    }
+
+    @keyframes arcIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes confettiFly {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -20px, 0) rotate(0deg) scale(0.8);
+      }
+      10% { opacity: 1; }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--confetti-x, 0px), calc(100vh + 40px), 0) rotate(var(--confetti-rotate, 540deg)) scale(1);
+      }
+    }
+
+    @keyframes starFlash {
+      0% { opacity:0; transform: scale(0.6) translateY(10px); }
+      30% { opacity:1; transform: scale(1.2) translateY(-6px); }
+      60% { opacity:1; transform: scale(1) translateY(-12px); }
+      100% { opacity:0; transform: scale(0.8) translateY(-24px); }
+    }
+
+    @keyframes answerPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.12); opacity: 0.82; }
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 14px; }
+      .card { padding: 18px; }
+      h1 { font-size: 32px; }
+      .problem { font-size: 46px; }
+      .stat-value { font-size: 28px; }
+      .star { width: 64px; height: 64px; font-size: 28px; }
+      .stem { height: 32px; }
+      .tick-label { font-size: 19px; }
+      button { min-height: 56px; font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+  <button id="exitFocusBtn" style="display:none; position:fixed; top:16px; right:16px; z-index:100; background:#0f172a; color:white; border:none; padding:10px 14px; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.2);">Exit Focus Mode</button>
+  <div class="page">
+    <div class="layout">
+      <section class="card">
+        <div class="row">
+          <div>
+            <div class="badge">Number Line Adventure</div>
+            <h1>Add and subtract to 20</h1>
+            <p class="subtle" style="margin-top:10px;">Solve each problem by dragging the marker to the answer on the number line.</p>
+          </div>
+        </div>
+
+        <div class="challenge">
+          <div class="small muted" style="text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Your challenge</div>
+          <div class="problem" id="problemText">0 + 0 = ?</div>
+          <div class="pill">🎯 Marker is on <strong id="markerReadout">0</strong></div>
+        </div>
+
+        <div class="section">
+          <div class="row" style="margin-bottom:10px;">
+            <div>
+              <h3>Number line</h3>
+              <p class="small muted" style="margin-top:4px;">Drag the star marker to choose your answer.</p>
+            </div>
+            <button class="btn-outline" id="startButton">Start at 0</button>
+          </div>
+
+          <div class="line-wrap">
+            <div class="line" id="numberLine">
+              <div class="line-track"></div>
+              <div class="line-fill" id="lineFill"></div>
+              <div class="marker" id="marker">
+                <div class="star">⭐</div>
+                <div class="stem"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint" id="jumpHint"></div>
+
+          <div class="jumps" id="jumpSection">
+            <div class="small" style="font-weight:700;color:var(--emerald-700);">👣 Animated jump path</div>
+            <div class="tiny" style="color:var(--emerald-700);margin-top:6px;">Watch each jump on the number line to model the counting strategy.</div>
+            <div class="jump-line" id="jumpLine">
+              <div class="jump-base"></div>
+            </div>
+          </div>
+
+          <div class="visualizer">
+            <div class="row">
+              <div>
+                <div class="small" style="font-weight:700;color:var(--purple-500);">🔲 Quantity visualizer</div>
+                <div class="tiny" id="visualizerText" style="color:var(--purple-500);margin-top:4px;">See the number using groups of five.</div>
+              </div>
+              <div class="toggle-group">
+                <button class="btn-chip active" id="fiveModeBtn">5-frame</button>
+                <button class="btn-chip" id="tenModeBtn">10-frame</button>
+              </div>
+            </div>
+            <div class="frame-grid" id="frameGrid"></div>
+            <div class="small" id="frameSummary" style="margin-top:12px;color:var(--purple-500);"></div>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn-primary" id="checkButton">Check answer</button>
+          <button class="btn-secondary" id="skipButton">Skip</button>
+          <button class="btn-outline" id="resetButton">Reset</button>
+        </div>
+
+        <div class="feedback" id="feedbackBox">
+          <div class="small muted" style="text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Teacher feedback</div>
+          <div id="feedbackMessage" style="margin-top:8px;font-size:24px;font-weight:800;">Drag the marker to the correct answer on the number line.</div>
+        </div>
+      </section>
+
+      <aside>
+        <section class="card">
+          <h2>Progress</h2>
+          <div class="stat-grid" style="margin-top:18px;">
+            <div class="stat-box">
+              <div class="small muted">Current streak</div>
+              <div class="stat-value" id="streakCount">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="small muted">Correct answers</div>
+              <div class="stat-value" id="correctCount">0</div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <div class="row small subtle">
+              <span>Streak goal</span>
+              <span id="streakGoal">0/10</span>
+            </div>
+            <div class="progress-track" id="progressTrack"></div>
+          </div>
+
+          <div class="progress-stars" style="margin-top:18px; position:relative; overflow:hidden;">
+            <div class="small" style="font-weight:700;">🏆 Stars earned</div>
+            <div id="starsCount" style="margin-top:8px;font-size:32px;font-weight:800;">0</div>
+            <div id="starFlashLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
+          </div>
+        </section>
+
+        <section class="card" style="margin-top:24px;">
+          <h2>Classroom features</h2>
+
+          <div class="switch-row" style="margin-top:18px;">
+            <div>
+              <div style="font-weight:700;">🔊 Voice praise</div>
+              <div class="small muted" style="margin-top:4px;">Says things like “Excellent thinking! That’s 4 in a row!”</div>
+            </div>
+            <div class="switch on" data-setting="voicePraise"><div class="switch-knob"></div></div>
+          </div>
+
+          <div class="switch-row">
+            <div>
+              <div style="font-weight:700;">Show jump hint</div>
+              <div class="small muted" style="margin-top:4px;">Helps learners see how to move on the number line.</div>
+            </div>
+            <div class="switch on" data-setting="showJumpHint"><div class="switch-knob"></div></div>
+          </div>
+
+          <div class="switch-row">
+            <div>
+              <div style="font-weight:700;">Show animated jump arcs</div>
+              <div class="small muted" style="margin-top:4px;">Models each hop forward or backward one step at a time.</div>
+            </div>
+            <div class="switch on" data-setting="showJumpArcs"><div class="switch-knob"></div></div>
+          </div>
+
+          <div class="switch-row">
+            <div>
+              <div style="font-weight:700;">Focus mode</div>
+              <div class="small muted" style="margin-top:4px;">Reduces distractions and keeps only the core task visible.</div>
+            </div>
+            <div class="switch" data-setting="focusMode"><div class="switch-knob"></div></div>
+          </div>
+
+          <div class="settings-box">
+            <div style="font-weight:700;">Visualizer mode</div>
+            <div class="small muted" style="margin-top:4px;">Choose the quantity model that best fits the learner.</div>
+            <div class="toggle-group" style="margin-top:12px;">
+              <button class="btn-chip active" id="fiveModeBtnSide">5-frame</button>
+              <button class="btn-chip" id="tenModeBtnSide">10-frame</button>
+            </div>
+          </div>
+
+          <div class="encouragement">
+            <div style="font-weight:700;">Encouragement changes with success</div>
+            <div class="small" style="margin-top:10px;display:grid;gap:6px;">
+              <div><strong>1–2 correct:</strong> Nice work! Great job! Well done!</div>
+              <div><strong>3–4 correct:</strong> Excellent thinking! Great strategy! Keep it up!</div>
+              <div><strong>5+ streak:</strong> Amazing math skills! You are on fire! Brilliant thinking!</div>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const PRAISE = {
+      early: ["Nice work!", "Great job!", "Well done!", "You got it!", "Super job!"],
+      mid: ["Excellent thinking!", "Great strategy!", "Nice solving!", "You're doing great!", "Keep it up!"],
+      hot: ["Amazing math skills!", "Outstanding work!", "You are on fire!", "Fantastic problem solving!", "Brilliant thinking!"],
+    };
+
+    const state = {
+      lastSnapValue: null,
+      problem: null,
+      markerValue: 0,
+      dragging: false,
+      streak: 0,
+      correctTotal: 0,
+      stars: 0,
+      message: "Drag the marker to the correct answer on the number line.",
+      celebrate: false,
+      voicePraise: true,
+      showJumpHint: true,
+      showJumpArcs: true,
+      focusMode: false,
+      frameMode: "five",
+      justAnsweredCorrectly: false,
+    };
+
+    const els = {
+      starsCount: document.getElementById("starsCount"),
+      problemText: document.getElementById("problemText"),
+      markerReadout: document.getElementById("markerReadout"),
+      startButton: document.getElementById("startButton"),
+      line: document.getElementById("numberLine"),
+      lineFill: document.getElementById("lineFill"),
+      marker: document.getElementById("marker"),
+      jumpHint: document.getElementById("jumpHint"),
+      jumpSection: document.getElementById("jumpSection"),
+      jumpLine: document.getElementById("jumpLine"),
+      frameGrid: document.getElementById("frameGrid"),
+      frameSummary: document.getElementById("frameSummary"),
+      visualizerText: document.getElementById("visualizerText"),
+      feedbackMessage: document.getElementById("feedbackMessage"),
+      feedbackBox: document.getElementById("feedbackBox"),
+      streakCount: document.getElementById("streakCount"),
+      correctCount: document.getElementById("correctCount"),
+      streakGoal: document.getElementById("streakGoal"),
+      progressTrack: document.getElementById("progressTrack"),
+      checkButton: document.getElementById("checkButton"),
+      skipButton: document.getElementById("skipButton"),
+      resetButton: document.getElementById("resetButton"),
+      fiveModeBtn: document.getElementById("fiveModeBtn"),
+      tenModeBtn: document.getElementById("tenModeBtn"),
+      fiveModeBtnSide: document.getElementById("fiveModeBtnSide"),
+      tenModeBtnSide: document.getElementById("tenModeBtnSide"),
+      switches: document.querySelectorAll(".switch"),
+      confettiLayer: document.getElementById("confettiLayer"),
+      starFlashLayer: document.getElementById("starFlashLayer"),
+      exitFocusBtn: document.getElementById("exitFocusBtn"),
+    };
+
+    function randFrom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function makeProblem() {
+      const isAddition = Math.random() > 0.5;
+      if (isAddition) {
+        const a = Math.floor(Math.random() * 21);
+        const b = Math.floor(Math.random() * (21 - a));
+        return { a, b, op: "+", answer: a + b };
+      }
+      const a = Math.floor(Math.random() * 21);
+      const b = Math.floor(Math.random() * (a + 1));
+      return { a, b, op: "−", answer: a - b };
+    }
+
+    function getPraise(streak) {
+      if (streak >= 5) return randFrom(PRAISE.hot);
+      if (streak >= 3) return randFrom(PRAISE.mid);
+      return randFrom(PRAISE.early);
+    }
+
+    function getStarsForStreak(streak) {
+      if (streak >= 8) return 3;
+      if (streak >= 4) return 2;
+      return 1;
+    }
+
+    function clampValue(v) {
+      return Math.max(0, Math.min(20, Math.round(v)));
+    }
+
+    function valueToPercent(value) {
+      return (value / 20) * 100;
+    }
+
+    function speak(text) {
+      if (!state.voicePraise || !window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      utterance.pitch = 1.1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function setMessage(text, pop = false) {
+      state.message = text;
+      els.feedbackMessage.textContent = text;
+      if (pop) {
+        els.feedbackBox.classList.remove("pop");
+        void els.feedbackBox.offsetWidth;
+        els.feedbackBox.classList.add("pop");
+      }
+    }
+
+    function setFrameMode(mode) {
+      state.frameMode = mode;
+      const isFive = mode === "five";
+      [els.fiveModeBtn, els.fiveModeBtnSide].forEach(btn => btn.classList.toggle("active", isFive));
+      [els.tenModeBtn, els.tenModeBtnSide].forEach(btn => btn.classList.toggle("active", !isFive));
+      render();
+    }
+
+    function toggleSetting(name) {
+      state[name] = !state[name];
+      els.switches.forEach(sw => {
+        if (sw.dataset.setting === name) {
+          sw.classList.toggle("on", state[name]);
+        }
+      });
+      render();
+    }
+
+    function jumpText() {
+      return state.problem.op === "+"
+        ? `Start at ${state.problem.a}, then jump forward ${state.problem.b}.`
+        : `Start at ${state.problem.a}, then jump back ${state.problem.b}.`;
+    }
+
+    function jumpSteps() {
+      const dir = state.problem.op === "+" ? 1 : -1;
+      return Array.from({ length: state.problem.b }, (_, i) => {
+        const from = state.problem.a + i * dir;
+        const to = from + dir;
+        return { from, to };
+      });
+    }
+
+    function renderTicks() {
+      els.line.querySelectorAll(".tick").forEach(el => el.remove());
+      for (let i = 0; i <= 20; i++) {
+        const tick = document.createElement("div");
+        tick.className = "tick";
+
+        if (state.problem) {
+          if (i === state.problem.a) tick.classList.add("start-focus");
+
+          /* Only highlight the answer AFTER a correct response
+             so the answer is not revealed ahead of time */
+          if (state.justAnsweredCorrectly && i === state.problem.answer) {
+            tick.classList.add("answer-focus", "pulse");
+          }
+        }
+
+        tick.style.left = `${valueToPercent(i)}%`;
+        tick.innerHTML = `<div class="tick-mark"></div><div class="tick-label">${i}</div>`;
+        els.line.appendChild(tick);
+      }
+    }
+
+    function renderJumps() {
+      if (!state.problem) return;
+
+      els.jumpHint.style.display = state.showJumpHint ? "block" : "none";
+      els.jumpHint.innerHTML = `<strong>Hint:</strong> ${jumpText()}`;
+      els.jumpSection.style.display = state.showJumpArcs && state.problem.b > 0 ? "block" : "none";
+
+      els.jumpLine.querySelectorAll(".jump-arc").forEach(el => el.remove());
+      if (!(state.showJumpArcs && state.problem.b > 0)) return;
+
+      const jumpRect = els.jumpLine.getBoundingClientRect();
+      const innerWidth = Math.max(jumpRect.width - 24, 1);
+
+      jumpSteps().forEach((step, index) => {
+        const arc = document.createElement("div");
+        const leftPx = 12 + (Math.min(step.from, step.to) / 20) * innerWidth;
+        const widthPx = Math.max((Math.abs(step.to - step.from) / 20) * innerWidth, 18);
+        arc.className = "jump-arc";
+        arc.style.left = `${leftPx}px`;
+        arc.style.width = `${widthPx}px`;
+        arc.style.animationDelay = `${index * 0.18}s`;
+        arc.innerHTML = `
+          <svg viewBox="0 0 100 40" width="100%" height="40" aria-hidden="true" preserveAspectRatio="none">
+            <path d="${state.problem.op === "+" ? "M 6 30 Q 50 2 94 30" : "M 94 30 Q 50 2 6 30"}" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--emerald-400').trim()}" stroke-width="4" stroke-linecap="round"></path>
+          </svg>
+        `;
+        els.jumpLine.appendChild(arc);
+      });
+    }
+
+    function renderProgressBar() {
+      const colors = ["#fbbf24", "#60a5fa", "#34d399", "#c084fc", "#fb7185", "#22c55e", "#f97316", "#38bdf8", "#a78bfa", "#4ade80"];
+
+      if (els.progressTrack.children.length === 0) {
+        for (let i = 0; i < 10; i++) {
+          const seg = document.createElement("div");
+          seg.className = "progress-segment";
+          seg.style.background = colors[i % colors.length];
+          els.progressTrack.appendChild(seg);
+        }
+      }
+
+      const segments = els.progressTrack.children;
+      for (let i = 0; i < segments.length; i++) {
+        const shouldFill = i < state.streak;
+        const wasFilled = segments[i].classList.contains("filled");
+
+        if (shouldFill) {
+          segments[i].classList.add("filled");
+          if (!wasFilled) {
+            segments[i].classList.remove("pop-in");
+            void segments[i].offsetWidth;
+            segments[i].classList.add("pop-in");
+          }
+        } else {
+          segments[i].classList.remove("filled", "pop-in");
+        }
+      }
+    }
+
+    function renderFrames() {
+      const cols = state.frameMode === "ten" ? 10 : 5;
+      els.frameGrid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+      els.frameGrid.innerHTML = "";
+
+      for (let i = 0; i < 20; i++) {
+        const cell = document.createElement("div");
+        const filled = i < state.markerValue;
+        cell.className = "frame-cell";
+
+        if (filled) {
+          // Rekenrek-style pattern: 5 white, 5 red, repeating
+          cell.classList.add((i % 10) < 5 ? "filled-a" : "filled-b");
+        }
+
+        els.frameGrid.appendChild(cell);
+      }
+
+      els.visualizerText.textContent = `See the number using ${state.frameMode === "five" ? "rekenrek-style groups of five" : "rekenrek-style rows of ten"}.`;
+      els.frameSummary.textContent = `${state.markerValue} shown with alternating white and red groups of five.`;
+    }
+
+    function render() {
+      els.exitFocusBtn.style.display = state.focusMode ? "block" : "none";
+      document.body.classList.toggle("focus-mode", state.focusMode);
+      renderTicks();
+      els.problemText.textContent = `${state.problem.a} ${state.problem.op} ${state.problem.b} = ?`;
+      els.startButton.textContent = `Start at ${state.problem.a}`;
+      els.markerReadout.textContent = state.markerValue;
+      els.lineFill.style.width = `${valueToPercent(state.markerValue)}%`;
+      els.marker.style.left = `${valueToPercent(state.markerValue)}%`;
+      els.marker.classList.toggle("dragging", state.dragging);
+      els.starsCount.textContent = state.stars;
+      els.streakCount.textContent = state.streak;
+      els.correctCount.textContent = state.correctTotal;
+
+      els.streakGoal.textContent = `${Math.min(state.streak, 10)}/10`;
+
+      renderProgressBar();
+
+      renderJumps();
+      renderFrames();
+    }
+
+    function newProblem(withMessage = "Try the next one!") {
+      state.justAnsweredCorrectly = false;
+      state.problem = makeProblem();
+      state.markerValue = state.problem.a;
+      setMessage(withMessage);
+      render();
+    }
+
+    function updateFromPointer(clientX) {
+      const rect = els.line.getBoundingClientRect();
+      const relative = (clientX - rect.left) / rect.width;
+      const newValue = clampValue(relative * 20);
+
+      if (newValue !== state.lastSnapValue) {
+        els.marker.classList.remove("snap");
+        void els.marker.offsetWidth;
+        els.marker.classList.add("snap");
+        if (navigator.vibrate) navigator.vibrate(12);
+        state.lastSnapValue = newValue;
+      }
+
+      state.markerValue = newValue;
+      render();
+    }
+
+    function celebrateMarker() {
+      els.marker.classList.remove("bounce");
+      void els.marker.offsetWidth;
+      els.marker.classList.add("bounce");
+    }
+
+    function flashStar() {
+      const star = document.createElement("div");
+      star.className = "star-flash";
+      star.textContent = "⭐";
+      star.style.left = `${40 + Math.random()*20}%`;
+      star.style.top = `40%`;
+      els.starFlashLayer.appendChild(star);
+      star.addEventListener("animationend",()=>star.remove(),{once:true});
+    }
+
+    function launchConfetti() {
+      const colors = ["#fbbf24", "#7dd3fc", "#34d399", "#c084fc", "#fb7185", "#60a5fa"];
+      for (let i = 0; i < 36; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti-piece";
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.setProperty("--confetti-x", `${(Math.random() - 0.5) * 260}px`);
+        piece.style.setProperty("--confetti-rotate", `${360 + Math.random() * 720}deg`);
+        piece.style.animationDelay = `${Math.random() * 120}ms`;
+        piece.style.width = `${8 + Math.random() * 8}px`;
+        piece.style.height = `${10 + Math.random() * 12}px`;
+        els.confettiLayer.appendChild(piece);
+        piece.addEventListener("animationend", () => piece.remove(), { once: true });
+      }
+    }
+
+    function checkAnswer() {
+      if (state.markerValue === state.problem.answer) {
+        const newStreak = state.streak + 1;
+        const praise = getPraise(newStreak);
+        const earned = getStarsForStreak(newStreak);
+        const fullMessage = `${praise} That’s ${newStreak} in a row!`;
+        state.streak = newStreak;
+        state.correctTotal += 1;
+        state.stars += earned;
+        state.justAnsweredCorrectly = true;
+        for(let i=0;i<earned;i++){ flashStar(); }
+        celebrateMarker();
+        if (newStreak % 5 === 0 && !state.focusMode) {
+          launchConfetti();
+        }
+        setMessage(fullMessage, true);
+        speak(fullMessage);
+        render();
+        setTimeout(() => {
+          // reset highlight state so the next problem does NOT reveal the answer
+          state.justAnsweredCorrectly = false;
+          state.problem = makeProblem();
+          state.markerValue = state.problem.a;
+          render();
+        }, 1200);
+      } else {
+        state.justAnsweredCorrectly = false;
+        state.streak = 0;
+        setMessage(`Good try! Move the marker to ${state.problem.answer === 0 ? "0" : "the correct number"} and try again.`, true);
+        speak("Good try! Keep going!");
+        render();
+      }
+    }
+
+    function resetGame() {
+      state.justAnsweredCorrectly = false;
+      state.streak = 0;
+      state.correctTotal = 0;
+      state.stars = 0;
+      state.problem = makeProblem();
+      state.markerValue = state.problem.a;
+      setMessage("Game reset. Drag the marker to solve on the number line.");
+      render();
+    }
+
+    function moveMarkerToStart() {
+      if (!state.problem) return;
+      state.justAnsweredCorrectly = false;
+      state.dragging = false;
+      state.markerValue = state.problem.a;
+      setMessage(`Start at ${state.problem.a}. ${state.problem.op === "+" ? `Jump forward ${state.problem.b}.` : `Jump back ${state.problem.b}.`}`);
+      render();
+    }
+
+    els.line.addEventListener("pointerdown", (e) => {
+      state.dragging = true;
+      updateFromPointer(e.clientX);
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (!state.dragging) return;
+      updateFromPointer(e.clientX);
+    });
+
+    window.addEventListener("pointerup", () => {
+      state.dragging = false;
+      els.marker.classList.remove("snap");
+      render();
+    });
+
+    els.startButton.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      moveMarkerToStart();
+    });
+
+    els.startButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      moveMarkerToStart();
+    });
+    els.checkButton.addEventListener("click", checkAnswer);
+    els.skipButton.addEventListener("click", () => newProblem());
+    els.resetButton.addEventListener("click", resetGame);
+    els.fiveModeBtn.addEventListener("click", () => setFrameMode("five"));
+    els.tenModeBtn.addEventListener("click", () => setFrameMode("ten"));
+    els.fiveModeBtnSide.addEventListener("click", () => setFrameMode("five"));
+    els.tenModeBtnSide.addEventListener("click", () => setFrameMode("ten"));
+
+    els.switches.forEach(sw => {
+      sw.addEventListener("click", () => toggleSetting(sw.dataset.setting));
+    });
+
+    els.exitFocusBtn.addEventListener("click", () => {
+      state.focusMode = false;
+      document.querySelector('[data-setting="focusMode"]').classList.remove("on");
+      render();
+    });
+
+    // Create a small manifest dynamically so the game can be added to the iPad home screen
+(function(){
+  const manifest = {
+    name: "Number Line Adventure",
+    short_name: "Number Line",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#ffffff",
+    theme_color: "#0f172a",
+    icons: [
+      {
+        src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAQAAAAAYLlVAAAAK0lEQVR4Ae3BAQ0AAADCIPunNscwYAAAAAAAAAAAAAAAAAAAAAAAAAAAAPgYAwAB0j4nWQAAAABJRU5ErkJggg==",
+        sizes: "192x192",
+        type: "image/png"
+      }
+    ]
+  };
+
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  document.getElementById('dynamic-manifest').setAttribute('href', url);
+})();
+
+window.addEventListener("beforeunload", () => {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+    });
+
+    state.problem = makeProblem();
+    state.markerValue = state.problem.a;
+    setMessage("Drag the marker to the correct answer on the number line.");
+    render();
+  </script>
+</body>
+</html>
