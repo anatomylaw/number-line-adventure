@@ -353,22 +353,52 @@
       max-width: 420px;
     }
 
-    .frame-cell {
+    .frame-grid.counting-enabled .frame-cell {
       height: 32px;
+      min-height: 32px;
+      width: 100%;
+      padding: 0;
       border-radius: 10px;
       border: 1px solid #d1d5db;
       background: #f8fafc;
-      transition: transform 0.12s ease, background 0.2s ease, border 0.2s ease;
+      transition: transform 0.12s ease, background 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
+      cursor: default;
     }
 
-    .frame-cell.filled-a {
+    .frame-grid.counting-enabled .frame-cell.can-toggle {
+      cursor: pointer;
+      box-shadow: 0 0 0 2px rgba(125, 211, 252, 0.18);
+    }
+
+    .frame-grid.counting-enabled .frame-cell.can-toggle:hover {
+      transform: translateY(-1px);
+    }
+
+    .frame-grid.counting-enabled .frame-cell.is-disabled {
+      cursor: default;
+      opacity: 0.96;
+      box-shadow: none;
+    }
+
+    .frame-grid.counting-enabled .frame-cell.active-step {
+      transform: scale(1.06);
+      box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.45);
+    }
+
+    .frame-grid.counting-enabled .frame-cell.filled-a {
       background: #d1d5db;
       border-color: #9ca3af;
     }
 
-    .frame-cell.filled-b {
+    .frame-grid.counting-enabled .frame-cell.filled-b {
       background: #dc2626;
       border-color: #b91c1c;
+    }
+
+    /* visual divider between groups of five in 10-frame */
+    .frame-cell.ten-divider {
+      margin-left: 0;
+      border-left: 3px solid #e5e7eb;
     }
 
     .feedback {
@@ -392,6 +422,18 @@
       background: var(--slate-50);
       border-radius: 18px;
       padding: 16px;
+      border: 2px solid transparent;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-box.streak-box {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border-color: #93c5fd;
+    }
+
+    .stat-box.correct-box {
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border-color: #6ee7b7;
     }
 
     .stat-value {
@@ -440,11 +482,68 @@
       background: var(--slate-50);
     }
 
-    .progress-stars { background: var(--amber-50); }
+    .reward-panel {
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #fff7ed, #fef3c7);
+      border: 2px solid #fbbf24;
+      box-shadow: 0 10px 26px rgba(251, 191, 36, 0.24);
+    }
+
+    .reward-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #92400e;
+    }
+
+    .reward-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .reward-chip {
+      background: rgba(255,255,255,0.85);
+      border: 1px solid #fcd34d;
+      border-radius: 16px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .reward-chip strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1;
+      color: #92400e;
+    }
+
+    .reward-chip span {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #78350f;
+    }
+
+    .progress-stars {
+      background: var(--amber-50);
+      border: 2px solid #fcd34d;
+      box-shadow: 0 8px 18px rgba(251, 191, 36, 0.18);
+    }
     .guide { background: var(--amber-50); }
     .encouragement { background: var(--sky-50); color: var(--sky-700); }
 
-    .switch-row {
+    aside{display:flex;flex-direction:column;gap:24px;}
+
+/* push classroom features panel to bottom */
+aside section:last-child{margin-top:auto;}
+
+.switch-row {
       display: flex;
       justify-content: space-between;
       gap: 14px;
@@ -499,7 +598,7 @@
       height: 18px;
       border-radius: 4px;
       opacity: 0.95;
-      animation: confettiFly 1800ms ease-out forwards;
+      animation: confettiFly var(--confetti-duration, 1800ms) ease-out forwards;
       will-change: transform, opacity;
     }
 
@@ -675,10 +774,6 @@
 
           <div class="visualizer">
             <div class="row">
-              <div>
-                <div class="small" style="font-weight:700;color:var(--purple-500);">🔲 Quantity visualizer</div>
-                <div class="tiny" id="visualizerText" style="color:var(--purple-500);margin-top:4px;">See the number using groups of five.</div>
-              </div>
               <div class="toggle-group">
                 <button class="btn-chip active" id="fiveModeBtn">5-frame</button>
                 <button class="btn-chip" id="tenModeBtn">10-frame</button>
@@ -702,20 +797,21 @@
       </section>
 
       <aside>
-        <section class="card">
+        <section class="card" style="align-self:start; position:sticky; top:8px;">
           <h2>Progress</h2>
-          <div class="stat-grid" style="margin-top:18px;">
-            <div class="stat-box">
+
+          <div class="stat-grid" style="margin-top:14px;">
+            <div class="stat-box streak-box">
               <div class="small muted">Current streak</div>
               <div class="stat-value" id="streakCount">0</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-box correct-box">
               <div class="small muted">Correct answers</div>
               <div class="stat-value" id="correctCount">0</div>
             </div>
           </div>
 
-          <div style="margin-top:18px;">
+          <div style="margin-top:14px;">
             <div class="row small subtle">
               <span>Streak goal</span>
               <span id="streakGoal">0/10</span>
@@ -723,68 +819,80 @@
             <div class="progress-track" id="progressTrack"></div>
           </div>
 
-          <div class="progress-stars" style="margin-top:18px; position:relative; overflow:hidden;">
-            <div class="small" style="font-weight:700;">🏆 Stars earned</div>
-            <div id="starsCount" style="margin-top:8px;font-size:32px;font-weight:800;">0</div>
+          <div class="progress-stars" style="margin-top:16px; position:relative; overflow:hidden;">
+            <div class="small" style="font-weight:800; font-size:16px; color:#92400e;">🏆 Stars earned</div>
+            <div id="starsCount" style="margin-top:8px;font-size:44px;line-height:1;font-weight:900;color:#92400e;">0</div>
+            <div class="small" style="margin-top:8px;color:#92400e;font-weight:700;">Build your streak to earn more stars each time.</div>
             <div id="starFlashLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
           </div>
-        </section>
 
-        <section class="card" style="margin-top:24px;">
-          <h2>Classroom features</h2>
-
-          <div class="switch-row" style="margin-top:18px;">
-            <div>
-              <div style="font-weight:700;">🔊 Voice praise</div>
-              <div class="small muted" style="margin-top:4px;">Says things like “Excellent thinking! That’s 4 in a row!”</div>
+          <div class="reward-panel">
+            <div class="reward-title">🏅 Reward goals</div>
+            <div class="reward-grid">
+              <div class="reward-chip"><strong>+1</strong><span>every correct</span></div>
+              <div class="reward-chip"><strong>+2</strong><span>4+ streak</span></div>
+              <div class="reward-chip"><strong>+3</strong><span>8+ streak</span></div>
             </div>
-            <div class="switch on" data-setting="voicePraise"><div class="switch-knob"></div></div>
-          </div>
-
-          <div class="switch-row">
-            <div>
-              <div style="font-weight:700;">Show jump hint</div>
-              <div class="small muted" style="margin-top:4px;">Helps learners see how to move on the number line.</div>
-            </div>
-            <div class="switch on" data-setting="showJumpHint"><div class="switch-knob"></div></div>
-          </div>
-
-          <div class="switch-row">
-            <div>
-              <div style="font-weight:700;">Show animated jump arcs</div>
-              <div class="small muted" style="margin-top:4px;">Models each hop forward or backward one step at a time.</div>
-            </div>
-            <div class="switch on" data-setting="showJumpArcs"><div class="switch-knob"></div></div>
-          </div>
-
-          <div class="switch-row">
-            <div>
-              <div style="font-weight:700;">Focus mode</div>
-              <div class="small muted" style="margin-top:4px;">Reduces distractions and keeps only the core task visible.</div>
-            </div>
-            <div class="switch" data-setting="focusMode"><div class="switch-knob"></div></div>
-          </div>
-
-          <div class="settings-box">
-            <div style="font-weight:700;">Visualizer mode</div>
-            <div class="small muted" style="margin-top:4px;">Choose the quantity model that best fits the learner.</div>
-            <div class="toggle-group" style="margin-top:12px;">
-              <button class="btn-chip active" id="fiveModeBtnSide">5-frame</button>
-              <button class="btn-chip" id="tenModeBtnSide">10-frame</button>
-            </div>
-          </div>
-
-          <div class="encouragement">
-            <div style="font-weight:700;">Encouragement changes with success</div>
-            <div class="small" style="margin-top:10px;display:grid;gap:6px;">
-              <div><strong>1–2 correct:</strong> Nice work! Great job! Well done!</div>
-              <div><strong>3–4 correct:</strong> Excellent thinking! Great strategy! Keep it up!</div>
-              <div><strong>5+ streak:</strong> Amazing math skills! You are on fire! Brilliant thinking!</div>
-            </div>
+            <div class="small" style="margin-top:12px;color:#92400e;font-weight:700;">Correct answers should feel exciting — bigger streaks earn bigger rewards.</div>
           </div>
         </section>
       </aside>
-    </div>
+        </div>
+
+    <section class="card" style="max-width:1200px; margin:24px auto 0;">
+      <h2>Classroom features</h2>
+
+      <div class="switch-row" style="margin-top:18px;">
+        <div>
+          <div style="font-weight:700;">🔊 Voice praise</div>
+          <div class="small muted" style="margin-top:4px;">Says things like “Excellent thinking! That’s 4 in a row!”</div>
+        </div>
+        <div class="switch on" data-setting="voicePraise"><div class="switch-knob"></div></div>
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <div style="font-weight:700;">Show jump hint</div>
+          <div class="small muted" style="margin-top:4px;">Helps learners see how to move on the number line.</div>
+        </div>
+        <div class="switch" data-setting="showJumpHint"><div class="switch-knob"></div></div>
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <div style="font-weight:700;">Show animated jump arcs</div>
+          <div class="small muted" style="margin-top:4px;">Models each hop forward or backward one step at a time.</div>
+        </div>
+        <div class="switch" data-setting="showJumpArcs"><div class="switch-knob"></div></div>
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <div style="font-weight:700;">Focus mode</div>
+          <div class="small muted" style="margin-top:4px;">Reduces distractions and keeps only the core task visible.</div>
+        </div>
+        <div class="switch" data-setting="focusMode"><div class="switch-knob"></div></div>
+      </div>
+
+      <div class="settings-box">
+        <div style="font-weight:700;">Visualizer mode</div>
+        <div class="small muted" style="margin-top:4px;">Choose the quantity model that best fits the learner.</div>
+        <div class="toggle-group" style="margin-top:12px;">
+          <button class="btn-chip active" id="fiveModeBtnSide">5-frame</button>
+          <button class="btn-chip" id="tenModeBtnSide">10-frame</button>
+        </div>
+      </div>
+
+      <div class="encouragement">
+        <div style="font-weight:700;">Encouragement changes with success</div>
+        <div class="small" style="margin-top:10px;display:grid;gap:6px;">
+          <div><strong>1–2 correct:</strong> Nice work! Great job! Well done!</div>
+          <div><strong>3–4 correct:</strong> Excellent thinking! Great strategy! Keep it up!</div>
+          <div><strong>5+ streak:</strong> Amazing math skills! You are on fire! Brilliant thinking!</div>
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <script>
@@ -805,11 +913,15 @@
       message: "Drag the marker to the correct answer on the number line.",
       celebrate: false,
       voicePraise: true,
-      showJumpHint: true,
-      showJumpArcs: true,
+      showJumpHint: false,
+      showJumpArcs: false,
       focusMode: false,
       frameMode: "five",
       justAnsweredCorrectly: false,
+      countingMode: false,
+      countTargetValue: null,
+      countAnimationTimer: null,
+      activeStepValue: null,
     };
 
     const els = {
@@ -825,8 +937,7 @@
       jumpLine: document.getElementById("jumpLine"),
       frameGrid: document.getElementById("frameGrid"),
       frameSummary: document.getElementById("frameSummary"),
-      visualizerText: document.getElementById("visualizerText"),
-      feedbackMessage: document.getElementById("feedbackMessage"),
+            feedbackMessage: document.getElementById("feedbackMessage"),
       feedbackBox: document.getElementById("feedbackBox"),
       streakCount: document.getElementById("streakCount"),
       correctCount: document.getElementById("correctCount"),
@@ -906,6 +1017,88 @@
       [els.fiveModeBtn, els.fiveModeBtnSide].forEach(btn => btn.classList.toggle("active", isFive));
       [els.tenModeBtn, els.tenModeBtnSide].forEach(btn => btn.classList.toggle("active", !isFive));
       render();
+    }
+
+    function stopCountAnimation() {
+      if (state.countAnimationTimer) {
+        clearTimeout(state.countAnimationTimer);
+        state.countAnimationTimer = null;
+      }
+      state.countingMode = false;
+      state.countTargetValue = null;
+      state.activeStepValue = null;
+    }
+
+    function animateMarkerToValue(targetValue) {
+      stopCountAnimation();
+      const clampedTarget = clampValue(targetValue);
+      if (clampedTarget === state.markerValue) {
+        state.activeStepValue = clampedTarget;
+        render();
+        state.countAnimationTimer = setTimeout(() => {
+          state.activeStepValue = null;
+          state.countAnimationTimer = null;
+          render();
+        }, 220);
+        return;
+      }
+
+      state.countingMode = true;
+      state.countTargetValue = clampedTarget;
+      const direction = clampedTarget > state.markerValue ? 1 : -1;
+
+      const stepForward = () => {
+        if (state.markerValue === state.countTargetValue) {
+          state.activeStepValue = state.markerValue;
+          render();
+          state.countAnimationTimer = setTimeout(() => {
+            state.activeStepValue = null;
+            state.countAnimationTimer = null;
+            state.countingMode = false;
+            state.countTargetValue = null;
+            render();
+          }, 220);
+          return;
+        }
+
+        state.markerValue += direction;
+        state.activeStepValue = state.markerValue;
+
+        if (state.markerValue !== state.lastSnapValue) {
+          els.marker.classList.remove("snap");
+          void els.marker.offsetWidth;
+          els.marker.classList.add("snap");
+          state.lastSnapValue = state.markerValue;
+        }
+
+        render();
+        state.countAnimationTimer = setTimeout(stepForward, 180);
+      };
+
+      stepForward();
+    }
+
+    function toggleBrickValue(value) {
+      state.justAnsweredCorrectly = false;
+
+      // Only allow toggling the boundary brick so the learner adds or removes
+      // one brick at a time in sync with the number line.
+      const addBrickValue = state.markerValue + 1;
+      const removeBrickValue = state.markerValue;
+
+      if (value === addBrickValue && value <= 20) {
+        animateMarkerToValue(addBrickValue);
+        setMessage(`Add 1 brick to make ${addBrickValue}. The marker moves with it.`);
+        return;
+      }
+
+      if (value === removeBrickValue && value >= 1) {
+        animateMarkerToValue(removeBrickValue - 1);
+        setMessage(`Take away 1 brick to make ${removeBrickValue - 1}. The marker moves with it.`);
+        return;
+      }
+
+      setMessage(`Tap the next empty brick to add 1, or tap the last filled brick to take away 1.`);
     }
 
     function toggleSetting(name) {
@@ -1017,24 +1210,60 @@
 
     function renderFrames() {
       const cols = state.frameMode === "ten" ? 10 : 5;
-      els.frameGrid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
-      els.frameGrid.innerHTML = "";
+      const addBrickValue = state.markerValue + 1;
+      const removeBrickValue = state.markerValue;
+      const totalCells = 20;
 
-      for (let i = 0; i < 20; i++) {
-        const cell = document.createElement("div");
+      els.frameGrid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+      els.frameGrid.style.columnGap = state.frameMode === "ten" ? "12px" : "10px";
+      els.frameGrid.style.rowGap = state.frameMode === "ten" ? "10px" : "8px";
+      els.frameGrid.style.maxWidth = "420px";
+      els.frameGrid.innerHTML = "";
+      els.frameGrid.classList.add("counting-enabled");
+
+      for (let i = 0; i < totalCells; i++) {
+        const cell = document.createElement("button");
         const filled = i < state.markerValue;
+        const value = i + 1;
+        const canAdd = value === addBrickValue && value <= totalCells;
+        const canRemove = value === removeBrickValue && value >= 1;
+        const canToggle = canAdd || canRemove;
+
+        cell.type = "button";
         cell.className = "frame-cell";
 
-        if (filled) {
-          // Rekenrek-style pattern: 5 white, 5 red, repeating
-          cell.classList.add((i % 10) < 5 ? "filled-a" : "filled-b");
+        if (state.frameMode === "ten" && i === 5) {
+          cell.classList.add("ten-divider");
         }
 
-        els.frameGrid.appendChild(cell);
-      }
+        cell.dataset.value = String(value);
+        cell.classList.toggle("can-toggle", canToggle);
+        cell.classList.toggle("is-disabled", !canToggle);
+        cell.setAttribute(
+          "aria-label",
+          canAdd
+            ? `Add brick ${value}`
+            : canRemove
+              ? `Remove brick ${value}`
+              : `Brick ${value}`
+        );
 
-      els.visualizerText.textContent = `See the number using ${state.frameMode === "five" ? "rekenrek-style groups of five" : "rekenrek-style rows of ten"}.`;
-      els.frameSummary.textContent = `${state.markerValue} shown with alternating white and red groups of five.`;
+        if (filled) {
+          cell.classList.add(Math.floor(i / 5) % 2 === 0 ? "filled-a" : "filled-b");
+        }
+
+        if (state.activeStepValue === value) {
+          cell.classList.add("active-step");
+        }
+
+        cell.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          toggleBrickValue(value);
+        });
+
+        els.frameGrid.appendChild(cell);
+      }      els.frameSummary.textContent = `${state.markerValue} shown with alternating grey and red groups of five, linked to the number line.`;
     }
 
     function render() {
@@ -1060,6 +1289,7 @@
     }
 
     function newProblem(withMessage = "Try the next one!") {
+      stopCountAnimation();
       state.justAnsweredCorrectly = false;
       state.problem = makeProblem();
       state.markerValue = state.problem.a;
@@ -1100,24 +1330,27 @@
       star.addEventListener("animationend",()=>star.remove(),{once:true});
     }
 
-    function launchConfetti() {
+    function launchConfetti(multiplier = 1, duration = 1800) {
       const colors = ["#fbbf24", "#7dd3fc", "#34d399", "#c084fc", "#fb7185", "#60a5fa"];
-      for (let i = 0; i < 36; i++) {
+      const total = Math.round(36 * multiplier);
+      for (let i = 0; i < total; i++) {
         const piece = document.createElement("div");
         piece.className = "confetti-piece";
         piece.style.left = `${Math.random() * 100}%`;
         piece.style.background = colors[i % colors.length];
-        piece.style.setProperty("--confetti-x", `${(Math.random() - 0.5) * 260}px`);
+        piece.style.setProperty("--confetti-x", `${(Math.random() - 0.5) * (260 + 160 * multiplier)}px`);
         piece.style.setProperty("--confetti-rotate", `${360 + Math.random() * 720}deg`);
-        piece.style.animationDelay = `${Math.random() * 120}ms`;
-        piece.style.width = `${8 + Math.random() * 8}px`;
-        piece.style.height = `${10 + Math.random() * 12}px`;
+        piece.style.setProperty("--confetti-duration", `${duration}ms`);
+        piece.style.animationDelay = `${Math.random() * 200}ms`;
+        piece.style.width = `${8 + Math.random() * 10}px`;
+        piece.style.height = `${10 + Math.random() * 14}px`;
         els.confettiLayer.appendChild(piece);
         piece.addEventListener("animationend", () => piece.remove(), { once: true });
       }
     }
 
     function checkAnswer() {
+      stopCountAnimation();
       if (state.markerValue === state.problem.answer) {
         const newStreak = state.streak + 1;
         const praise = getPraise(newStreak);
@@ -1129,8 +1362,15 @@
         state.justAnsweredCorrectly = true;
         for(let i=0;i<earned;i++){ flashStar(); }
         celebrateMarker();
-        if (newStreak % 5 === 0 && !state.focusMode) {
-          launchConfetti();
+        if (!state.focusMode) {
+          if (newStreak % 5 === 0) {
+          // BIG celebration every 5 in a row
+          launchConfetti(7, 3400);
+          setTimeout(()=>launchConfetti(5,3200),200);
+          setTimeout(()=>launchConfetti(4,3000),400);
+        } else {
+          launchConfetti(1.4,1800);
+        }
         }
         setMessage(fullMessage, true);
         speak(fullMessage);
@@ -1152,6 +1392,7 @@
     }
 
     function resetGame() {
+      stopCountAnimation();
       state.justAnsweredCorrectly = false;
       state.streak = 0;
       state.correctTotal = 0;
@@ -1163,6 +1404,7 @@
     }
 
     function moveMarkerToStart() {
+      stopCountAnimation();
       if (!state.problem) return;
       state.justAnsweredCorrectly = false;
       state.dragging = false;
@@ -1172,6 +1414,7 @@
     }
 
     els.line.addEventListener("pointerdown", (e) => {
+      stopCountAnimation();
       state.dragging = true;
       updateFromPointer(e.clientX);
     });
@@ -1240,6 +1483,7 @@
 })();
 
 window.addEventListener("beforeunload", () => {
+      stopCountAnimation();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
     });
 
