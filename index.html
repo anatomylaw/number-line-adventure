@@ -1026,10 +1026,21 @@ aside section:last-child{margin-top:auto;}
       }
 
       const voices = window.speechSynthesis.getVoices();
+
+      // Prefer child‑friendly British (UK) or South African English voices
+      // Many systems label softer voices as "female" or specific names (e.g., Samantha, Serena, Ava).
       const preferred = voices.find(v =>
-        /female|samantha|ava|victoria|karen|serena|google uk english female/i.test(v.name)
-      );
-      if (preferred) utterance.voice = preferred;
+        (/en-GB|en-ZA/i.test(v.lang)) &&
+        /female|samantha|serena|ava|karen|victoria|google uk english female/i.test(v.name)
+      )
+      // fallback: any UK or South African voice
+      || voices.find(v => /en-GB|en-ZA/i.test(v.lang))
+      // fallback: soft‑sounding voice name even if locale label is different
+      || voices.find(v => /female|samantha|serena|ava|karen|victoria/i.test(v.name));
+
+      if (preferred) {
+        utterance.voice = preferred;
+      }
 
       window.speechSynthesis.speak(utterance);
     }
