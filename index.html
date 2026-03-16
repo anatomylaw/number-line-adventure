@@ -831,7 +831,7 @@ aside section:last-child{margin-top:auto;}
 
           <div class="progress-stars" style="margin-top:16px; position:relative; overflow:hidden;">
             <div class="small" style="font-weight:800; font-size:16px; color:#92400e;">🏆 Stars earned</div>
-            <div id="starsCount" style="margin-top:8px;font-size:44px;line-height:1;font-weight:900;color:#92400e;">0</div>
+            <div id="starsCollection" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; min-height:40px;"></div>
             <div class="small" style="margin-top:8px;color:#92400e;font-weight:700;">Build your streak to earn more stars each time.</div>
             <div id="starFlashLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
           </div>
@@ -935,7 +935,7 @@ aside section:last-child{margin-top:auto;}
     };
 
     const els = {
-      starsCount: document.getElementById("starsCount"),
+      starsCollection: document.getElementById("starsCollection"),
       problemText: document.getElementById("problemText"),
       markerReadout: document.getElementById("markerReadout"),
       startButton: document.getElementById("startButton"),
@@ -1027,16 +1027,18 @@ aside section:last-child{margin-top:auto;}
 
       const voices = window.speechSynthesis.getVoices();
 
-      // Prefer child‑friendly British (UK) or South African English voices
-      // Many systems label softer voices as "female" or specific names (e.g., Samantha, Serena, Ava).
+      // Prefer child‑friendly British (UK) or South African English FEMALE voices
       const preferred = voices.find(v =>
         (/en-GB|en-ZA/i.test(v.lang)) &&
-        /female|samantha|serena|ava|karen|victoria|google uk english female/i.test(v.name)
+        /female|woman|girl|samantha|serena|ava|karen|victoria|google uk english female/i.test(v.name)
       )
-      // fallback: any UK or South African voice
-      || voices.find(v => /en-GB|en-ZA/i.test(v.lang))
-      // fallback: soft‑sounding voice name even if locale label is different
-      || voices.find(v => /female|samantha|serena|ava|karen|victoria/i.test(v.name));
+      // fallback: any female UK or South African voice
+      || voices.find(v =>
+        (/en-GB|en-ZA/i.test(v.lang)) &&
+        /female|woman|samantha|serena|ava|karen|victoria/i.test(v.name)
+      )
+      // fallback: any UK or South African voice if female not available
+      || voices.find(v => /en-GB|en-ZA/i.test(v.lang));
 
       if (preferred) {
         utterance.voice = preferred;
@@ -1322,7 +1324,7 @@ aside section:last-child{margin-top:auto;}
       els.lineFill.style.width = `${valueToPercent(state.markerValue)}%`;
       els.marker.style.left = `${valueToPercent(state.markerValue)}%`;
       els.marker.classList.toggle("dragging", state.dragging);
-      els.starsCount.textContent = state.stars;
+      renderStarsCollection();
       els.streakCount.textContent = state.streak;
       els.correctCount.textContent = state.correctTotal;
 
@@ -1367,6 +1369,19 @@ aside section:last-child{margin-top:auto;}
       els.marker.classList.remove("bounce");
       void els.marker.offsetWidth;
       els.marker.classList.add("bounce");
+    }
+
+    function renderStarsCollection() {
+      if (!els.starsCollection) return;
+      els.starsCollection.innerHTML = "";
+      for (let i = 0; i < state.stars; i++) {
+        const star = document.createElement("div");
+        star.textContent = "⭐";
+        star.style.fontSize = "28px";
+        star.style.lineHeight = "1";
+        star.style.filter = "drop-shadow(0 2px 4px rgba(251, 191, 36, 0.35))";
+        els.starsCollection.appendChild(star);
+      }
     }
 
     function flashStar() {
