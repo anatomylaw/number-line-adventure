@@ -538,7 +538,12 @@
     .guide { background: var(--amber-50); }
     .encouragement { background: var(--sky-50); color: var(--sky-700); }
 
-    aside{display:flex;flex-direction:column;gap:24px;}
+    aside{display:flex;flex-direction:column;gap:12px;padding-top:110px;align-self:start;} 
+
+.check-panel{position:sticky;top:8px;z-index:3;margin-bottom:22px;} 
+.check-panel .btn-primary{width:100%;min-height:60px;font-size:20px;box-shadow:0 10px 24px rgba(0,0,0,0.18);background:#dc2626;color:white;} .check-panel .btn-primary.pulse{animation:checkPulse 900ms ease-in-out infinite;} 
+@keyframes checkPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);box-shadow:0 0 0 6px rgba(220,38,38,0.25),0 10px 24px rgba(0,0,0,0.18);} }
+.check-panel .btn-primary:hover{background:#b91c1c;} .check-panel .btn-primary:active{background:#991b1b;} 
 
 /* push classroom features panel to bottom */
 aside section:last-child{margin-top:auto;}
@@ -707,6 +712,8 @@ aside section:last-child{margin-top:auto;}
 
     @media (max-width: 980px) {
       .layout { grid-template-columns: 1fr; }
+      aside { padding-top: 0; }
+      .check-panel { position: static; }
     }
 
     @media (max-width: 640px) {
@@ -731,7 +738,7 @@ aside section:last-child{margin-top:auto;}
         <div class="row">
           <div>
             <div class="badge">Number Line Adventure</div>
-            <h1>Add and subtract to 20</h1>
+            
             <p class="subtle" style="margin-top:10px;">Solve each problem by dragging the marker to the answer on the number line.</p>
           </div>
         </div>
@@ -775,8 +782,8 @@ aside section:last-child{margin-top:auto;}
           <div class="visualizer">
             <div class="row">
               <div class="toggle-group">
-                <button class="btn-chip active" id="fiveModeBtn">5-frame</button>
-                <button class="btn-chip" id="tenModeBtn">10-frame</button>
+                <button class="btn-chip" id="fiveModeBtn">5-frame</button>
+                <button class="btn-chip active" id="tenModeBtn">10-frame</button>
               </div>
             </div>
             <div class="frame-grid" id="frameGrid"></div>
@@ -785,7 +792,6 @@ aside section:last-child{margin-top:auto;}
         </div>
 
         <div class="button-row">
-          <button class="btn-primary" id="checkButton">Check answer</button>
           <button class="btn-secondary" id="skipButton">Skip</button>
           <button class="btn-outline" id="resetButton">Reset</button>
         </div>
@@ -797,7 +803,11 @@ aside section:last-child{margin-top:auto;}
       </section>
 
       <aside>
-        <section class="card" style="align-self:start; position:sticky; top:8px;">
+        <div class="check-panel">
+          <button class="btn-primary" id="checkButton">Check answer</button>
+        </div>
+
+        <section class="card" style="align-self:start; position:sticky; top:56px; margin-top:0;">
           <h2>Progress</h2>
 
           <div class="stat-grid" style="margin-top:14px;">
@@ -878,8 +888,8 @@ aside section:last-child{margin-top:auto;}
         <div style="font-weight:700;">Visualizer mode</div>
         <div class="small muted" style="margin-top:4px;">Choose the quantity model that best fits the learner.</div>
         <div class="toggle-group" style="margin-top:12px;">
-          <button class="btn-chip active" id="fiveModeBtnSide">5-frame</button>
-          <button class="btn-chip" id="tenModeBtnSide">10-frame</button>
+          <button class="btn-chip" id="fiveModeBtnSide">5-frame</button>
+          <button class="btn-chip active" id="tenModeBtnSide">10-frame</button>
         </div>
       </div>
 
@@ -916,7 +926,7 @@ aside section:last-child{margin-top:auto;}
       showJumpHint: false,
       showJumpArcs: false,
       focusMode: false,
-      frameMode: "five",
+      frameMode: "ten",
       justAnsweredCorrectly: false,
       countingMode: false,
       countTargetValue: null,
@@ -992,12 +1002,35 @@ aside section:last-child{margin-top:auto;}
       return (value / 20) * 100;
     }
 
-    function speak(text) {
+    function speak(text, streakLevel = 0) {
       if (!state.voicePraise || !window.speechSynthesis) return;
+
       window.speechSynthesis.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1;
-      utterance.pitch = 1.1;
+
+      // Voice tone changes with success level:
+      // 1–2 correct = calm, 3–4 = more upbeat, 5+ = celebratory but still gentle.
+      if (streakLevel >= 5) {
+        utterance.rate = 0.92;
+        utterance.pitch = 1.38;
+        utterance.volume = 0.95;
+      } else if (streakLevel >= 3) {
+        utterance.rate = 0.88;
+        utterance.pitch = 1.3;
+        utterance.volume = 0.92;
+      } else {
+        utterance.rate = 0.82;
+        utterance.pitch = 1.22;
+        utterance.volume = 0.88;
+      }
+
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v =>
+        /female|samantha|ava|victoria|karen|serena|google uk english female/i.test(v.name)
+      );
+      if (preferred) utterance.voice = preferred;
+
       window.speechSynthesis.speak(utterance);
     }
 
@@ -1079,6 +1112,8 @@ aside section:last-child{margin-top:auto;}
     }
 
     function toggleBrickValue(value) {
+      // start pulse when learner interacts via the frame tiles
+      els.checkButton.classList.add("pulse");
       state.justAnsweredCorrectly = false;
 
       // Only allow toggling the boundary brick so the learner adds or removes
@@ -1311,6 +1346,9 @@ aside section:last-child{margin-top:auto;}
       }
 
       state.markerValue = newValue;
+
+      // make Check Answer button pulse when learner changes the marker
+      els.checkButton.classList.add("pulse");
       render();
     }
 
@@ -1350,6 +1388,8 @@ aside section:last-child{margin-top:auto;}
     }
 
     function checkAnswer() {
+      // stop pulse once learner checks
+      els.checkButton.classList.remove("pulse");
       stopCountAnimation();
       if (state.markerValue === state.problem.answer) {
         const newStreak = state.streak + 1;
@@ -1373,7 +1413,7 @@ aside section:last-child{margin-top:auto;}
         }
         }
         setMessage(fullMessage, true);
-        speak(fullMessage);
+        speak(fullMessage, newStreak);
         render();
         setTimeout(() => {
           // reset highlight state so the next problem does NOT reveal the answer
@@ -1386,7 +1426,7 @@ aside section:last-child{margin-top:auto;}
         state.justAnsweredCorrectly = false;
         state.streak = 0;
         setMessage(`Good try! Move the marker to ${state.problem.answer === 0 ? "0" : "the correct number"} and try again.`, true);
-        speak("Good try! Keep going!");
+        speak("Good try! Keep going!", 0);
         render();
       }
     }
