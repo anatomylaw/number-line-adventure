@@ -200,6 +200,8 @@
       font-weight: 700;
       cursor: pointer;
       transition: transform 0.12s ease, opacity 0.12s ease, background 0.2s ease;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     button:hover { transform: translateY(-1px); }
@@ -605,6 +607,8 @@
       cursor: pointer;
       transition: background 0.2s ease;
       flex: 0 0 auto;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .switch.on { background: var(--slate-900); }
@@ -1386,6 +1390,14 @@
       els.swapButtonText.textContent = canSwapProblem()
         ? `Swap ${state.problem.a} and ${state.problem.b}`
         : "Swap start and steps";
+
+      // keep UI controls in sync with state after any interaction or rerender
+      [els.fiveModeBtn, els.fiveModeBtnSide].forEach(btn => btn.classList.toggle("active", state.frameMode === "five"));
+      [els.tenModeBtn, els.tenModeBtnSide].forEach(btn => btn.classList.toggle("active", state.frameMode === "ten"));
+      els.switches.forEach(sw => {
+        const setting = sw.dataset.setting;
+        sw.classList.toggle("on", !!state[setting]);
+      });
       els.lineFill.style.width = `${valueToPercent(state.markerValue)}%`;
       els.marker.style.left = `${valueToPercent(state.markerValue)}%`;
       els.marker.classList.toggle("dragging", state.dragging);
@@ -1645,20 +1657,61 @@
     els.resetButton.addEventListener("pointerup", activateReset);
     els.resetButton.addEventListener("touchend", activateReset);
     els.resetButton.addEventListener("touchcancel", () => {});
-    els.fiveModeBtn.addEventListener("click", () => setFrameMode("five"));
-    els.tenModeBtn.addEventListener("click", () => setFrameMode("ten"));
-    els.fiveModeBtnSide.addEventListener("click", () => setFrameMode("five"));
-    els.tenModeBtnSide.addEventListener("click", () => setFrameMode("ten"));
+    let lastModeActivation = 0;
+    const activateFrameMode = (mode, e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const now = Date.now();
+      if (now - lastModeActivation < 250) return;
+      lastModeActivation = now;
+      setFrameMode(mode);
+    };
+
+    [els.fiveModeBtn, els.fiveModeBtnSide].forEach(btn => {
+      btn.addEventListener("click", (e) => activateFrameMode("five", e));
+      btn.addEventListener("pointerup", (e) => activateFrameMode("five", e));
+      btn.addEventListener("touchend", (e) => activateFrameMode("five", e));
+    });
+
+    [els.tenModeBtn, els.tenModeBtnSide].forEach(btn => {
+      btn.addEventListener("click", (e) => activateFrameMode("ten", e));
+      btn.addEventListener("pointerup", (e) => activateFrameMode("ten", e));
+      btn.addEventListener("touchend", (e) => activateFrameMode("ten", e));
+    });
+
+    // Make classroom feature toggles reliable on iPad / touch devices
+    let lastSwitchActivation = 0;
+    const activateSwitch = (sw, e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const now = Date.now();
+      if (now - lastSwitchActivation < 250) return;
+      lastSwitchActivation = now;
+      toggleSetting(sw.dataset.setting);
+    };
 
     els.switches.forEach(sw => {
-      sw.addEventListener("click", () => toggleSetting(sw.dataset.setting));
+      sw.addEventListener("click", (e) => activateSwitch(sw, e));
+      sw.addEventListener("pointerup", (e) => activateSwitch(sw, e));
+      sw.addEventListener("touchend", (e) => activateSwitch(sw, e));
     });
 
-    els.exitFocusBtn.addEventListener("click", () => {
+    const deactivateFocusMode = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       state.focusMode = false;
-      document.querySelector('[data-setting="focusMode"]').classList.remove("on");
       render();
-    });
+    };
+
+    els.exitFocusBtn.addEventListener("click", deactivateFocusMode);
+    els.exitFocusBtn.addEventListener("pointerup", deactivateFocusMode);
+    els.exitFocusBtn.addEventListener("touchend", deactivateFocusMode);
 
     // Create a small manifest dynamically so the game can be added to the iPad home screen
 (function(){
