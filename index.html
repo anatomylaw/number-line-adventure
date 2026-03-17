@@ -381,11 +381,13 @@
       display: grid;
       gap: 6px;
       max-width: 420px;
+      width: 100%;
+      align-items: center;
     }
 
     .frame-grid.counting-enabled .frame-cell {
-      height: 32px;
-      min-height: 32px;
+      height: 42px;
+      min-height: 42px;
       width: 100%;
       padding: 0;
       border-radius: 10px;
@@ -401,7 +403,12 @@
     }
 
     .frame-grid.counting-enabled .frame-cell.can-toggle:hover {
-      transform: translateY(-1px);
+      transform: translateY(-2px) scale(1.05);
+    }
+
+    .frame-grid.counting-enabled .frame-cell.can-toggle:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.35);
     }
 
     .frame-grid.counting-enabled .frame-cell.is-disabled {
@@ -1317,9 +1324,9 @@
       const totalCells = 20;
 
       els.frameGrid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
-      els.frameGrid.style.columnGap = state.frameMode === "ten" ? "12px" : "10px";
-      els.frameGrid.style.rowGap = state.frameMode === "ten" ? "10px" : "8px";
-      els.frameGrid.style.maxWidth = "420px";
+      els.frameGrid.style.columnGap = state.frameMode === "ten" ? "12px" : "12px";
+      els.frameGrid.style.rowGap = state.frameMode === "ten" ? "12px" : "10px";
+      els.frameGrid.style.maxWidth = state.frameMode === "ten" ? "560px" : "420px";
       els.frameGrid.innerHTML = "";
       els.frameGrid.classList.add("counting-enabled");
 
