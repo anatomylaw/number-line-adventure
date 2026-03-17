@@ -133,17 +133,47 @@
       letter-spacing: -0.03em;
     }
 
-    .pill {
+    .challenge-action {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       margin-top: 16px;
       background: var(--white);
       border-radius: 999px;
-      padding: 10px 14px;
+      padding: 8px;
       box-shadow: var(--shadow-sm);
-      font-size: 14px;
-      color: var(--slate-600);
+    }
+
+    .swap-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: var(--sky-50);
+      color: var(--sky-700);
+      border: 1px solid var(--sky-100);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .swap-btn:hover {
+      background: var(--sky-100);
+    }
+
+    .swap-btn:disabled {
+      opacity: 0.45;
+      cursor: default;
+      transform: none;
+      background: var(--slate-100);
+      color: var(--slate-500);
+      border-color: var(--slate-200);
+    }
+
+    .swap-icon {
+      font-size: 18px;
+      line-height: 1;
     }
 
     .section {
@@ -743,7 +773,12 @@
         <div class="challenge">
           <div class="small muted" style="text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Your challenge</div>
           <div class="problem" id="problemText">0 + 0 = ?</div>
-          <div class="pill">🎯 Marker is on <strong id="markerReadout">0</strong></div>
+          <div class="challenge-action">
+            <button class="swap-btn" id="swapStartButton" type="button" aria-label="Swap the two numbers in the challenge">
+              <span class="swap-icon">⇄</span>
+              <span id="swapButtonText">Swap start and steps</span>
+            </button>
+          </div>
         </div>
 
         <div class="section">
@@ -934,7 +969,8 @@
     const els = {
       starsCollection: document.getElementById("starsCollection"),
       problemText: document.getElementById("problemText"),
-      markerReadout: document.getElementById("markerReadout"),
+      swapStartButton: document.getElementById("swapStartButton"),
+      swapButtonText: document.getElementById("swapButtonText"),
       startButton: document.getElementById("startButton"),
       line: document.getElementById("numberLine"),
       lineFill: document.getElementById("lineFill"),
@@ -1146,6 +1182,27 @@
       setMessage(`Tap the next empty brick to add 1, or tap the last filled brick to take away 1.`);
     }
 
+    function canSwapProblem() {
+      return !!state.problem && state.problem.op === "+";
+    }
+
+    function swapProblemStart() {
+      if (!canSwapProblem()) return;
+      stopCountAnimation();
+      state.justAnsweredCorrectly = false;
+      state.problem = {
+        ...state.problem,
+        a: state.problem.b,
+        b: state.problem.a,
+        answer: state.problem.answer,
+      };
+      state.markerValue = state.problem.a;
+      state.lastSnapValue = state.markerValue;
+      els.checkButton.classList.add("pulse");
+      setMessage(`Now start at ${state.problem.a} and jump forward ${state.problem.b}.`, true);
+      render();
+    }
+
     function toggleSetting(name) {
       state[name] = !state[name];
       els.switches.forEach(sw => {
@@ -1317,7 +1374,11 @@
       renderTicks();
       els.problemText.textContent = `${state.problem.a} ${state.problem.op} ${state.problem.b} = ?`;
       els.startButton.textContent = `Start at ${state.problem.a}`;
-      els.markerReadout.textContent = state.markerValue;
+      els.swapStartButton.disabled = !canSwapProblem();
+      els.swapStartButton.style.display = canSwapProblem() ? "inline-flex" : "none";
+      els.swapButtonText.textContent = canSwapProblem()
+        ? `Start at ${state.problem.a} instead of ${state.problem.b}`
+        : "Swap start and steps";
       els.lineFill.style.width = `${valueToPercent(state.markerValue)}%`;
       els.marker.style.left = `${valueToPercent(state.markerValue)}%`;
       els.marker.classList.toggle("dragging", state.dragging);
@@ -1503,6 +1564,18 @@
       e.preventDefault();
       e.stopPropagation();
       moveMarkerToStart();
+    });
+
+    els.swapStartButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      swapProblemStart();
+    });
+
+    els.swapStartButton.addEventListener("pointerup", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      swapProblemStart();
     });
     // Ensure Check Answer works once per tap on desktop and iPad / touch devices
     let lastCheckActivation = 0;
