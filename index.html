@@ -1377,7 +1377,7 @@
       els.swapStartButton.disabled = !canSwapProblem();
       els.swapStartButton.style.display = canSwapProblem() ? "inline-flex" : "none";
       els.swapButtonText.textContent = canSwapProblem()
-        ? `Start at ${state.problem.a} instead of ${state.problem.b}`
+        ? `Swap ${state.problem.a} and ${state.problem.b}`
         : "Swap start and steps";
       els.lineFill.style.width = `${valueToPercent(state.markerValue)}%`;
       els.marker.style.left = `${valueToPercent(state.markerValue)}%`;
@@ -1566,17 +1566,22 @@
       moveMarkerToStart();
     });
 
-    els.swapStartButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    // Ensure swap works once per tap on desktop and iPad / touch devices
+    let lastSwapActivation = 0;
+    const activateSwapStart = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const now = Date.now();
+      if (now - lastSwapActivation < 350) return;
+      lastSwapActivation = now;
       swapProblemStart();
-    });
+    };
 
-    els.swapStartButton.addEventListener("pointerup", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      swapProblemStart();
-    });
+    els.swapStartButton.addEventListener("click", activateSwapStart);
+    els.swapStartButton.addEventListener("pointerup", activateSwapStart);
+    els.swapStartButton.addEventListener("touchend", activateSwapStart);
     // Ensure Check Answer works once per tap on desktop and iPad / touch devices
     let lastCheckActivation = 0;
     const activateCheckAnswer = (e) => {
