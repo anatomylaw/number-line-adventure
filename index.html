@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1057,6 +1058,8 @@
       countAnimationTimer: null,
       activeStepValue: null,
       nextQuestionTimer: null,
+      recentProblemKeys: [],
+      lastOp: null,
     };
 
     const els = {
@@ -1098,15 +1101,82 @@
     }
 
     function makeProblem() {
-      const isAddition = Math.random() > 0.5;
-      if (isAddition) {
-        const a = Math.floor(Math.random() * 21);
-        const b = Math.floor(Math.random() * (21 - a));
-        return { a, b, op: "+", answer: a + b };
+      const MAX_ATTEMPTS = 60;
+
+      const makeCandidate = () => {
+        // Keep a healthy mix of addition and subtraction without forcing a rigid pattern.
+        const recentOps = state.recentProblemKeys
+          .slice(-4)
+          .map(key => key.split("|")[1]);
+        const recentAdditions = recentOps.filter(op => op === "+").length;
+        const recentSubtractions = recentOps.filter(op => op === "−").length;
+
+        let useAddition;
+        if (recentAdditions >= 3) {
+          useAddition = false;
+        } else if (recentSubtractions >= 3) {
+          useAddition = true;
+        } else {
+          useAddition = Math.random() > 0.5;
+        }
+
+        if (useAddition) {
+          // Keep sums within 0..20 and reduce overly trivial items.
+          const answer = Math.floor(Math.random() * 19) + 2; // 2..20
+          const a = Math.floor(Math.random() * (answer + 1));
+          const b = answer - a;
+          return { a, b, op: "+", answer };
+        }
+
+        // Subtraction stays within 0..20 and includes a wider variety of answers.
+        const a = Math.floor(Math.random() * 19) + 2; // 2..20
+        const b = Math.floor(Math.random() * (a + 1)); // 0..a
+        return { a, b, op: "−", answer: a - b };
+      };
+
+      const scoreCandidate = (p) => {
+        let score = 0;
+        const key = `${p.a}|${p.op}|${p.b}`;
+
+        if (state.recentProblemKeys.includes(key)) score -= 100;
+        if (p.op === state.lastOp) score -= 6;
+        if (p.b === 0) score -= 10;
+        if (p.a === 0 && p.op === "+") score -= 10;
+        if (p.answer === 0) score -= 4;
+        if (p.answer === 20) score -= 3;
+        if (p.a === p.b) score -= 2;
+
+        // Prefer a spread of jump sizes and answers.
+        score += Math.min(p.b, 7);
+        score += Math.min(p.answer, 12) * 0.2;
+        return score;
+      };
+
+      let best = null;
+      let bestScore = -Infinity;
+
+      for (let i = 0; i < MAX_ATTEMPTS; i++) {
+        const candidate = makeCandidate();
+        const score = scoreCandidate(candidate);
+        if (score > bestScore) {
+          best = candidate;
+          bestScore = score;
+        }
       }
-      const a = Math.floor(Math.random() * 21);
-      const b = Math.floor(Math.random() * (a + 1));
-      return { a, b, op: "−", answer: a - b };
+
+      // Fallback safety in case something unexpected happens.
+      if (!best) {
+        best = { a: 6, b: 4, op: "+", answer: 10 };
+      }
+
+      state.lastOp = best.op;
+      const key = `${best.a}|${best.op}|${best.b}`;
+      state.recentProblemKeys.push(key);
+      if (state.recentProblemKeys.length > 8) {
+        state.recentProblemKeys.shift();
+      }
+
+      return best;
     }
 
     function getPraise(streak) {
@@ -1682,6 +1752,8 @@
       state.streak = 0;
       state.correctTotal = 0;
       state.stars = 0;
+      state.recentProblemKeys = [];
+      state.lastOp = null;
       state.problem = makeProblem();
       state.markerValue = state.problem.a;
       state.lastSnapValue = state.markerValue;
