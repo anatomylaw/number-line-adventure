@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -325,6 +326,7 @@
 
     .marker-bubble.forward { background: #2563eb; }
     .marker-bubble.backward { background: #dc2626; }
+    .marker-bubble.neutral { background: #0f172a; }
 
     .marker.dragging { cursor: grabbing; }
 
@@ -1532,9 +1534,10 @@
       stopCountAnimation();
       state.justAnsweredCorrectly = false;
       state.problem = makeProblem();
-    state.markerValue = state.problem.a;
-    state.lastSnapValue = state.markerValue;
-    state.prevMarkerValue = state.markerValue;
+      state.markerValue = state.problem.a;
+      state.lastSnapValue = state.markerValue;
+      state.prevMarkerValue = state.markerValue;
+      resetBubbleToNeutral()
       setMessage(withMessage);
       render();
     }
@@ -1563,6 +1566,12 @@
       els.marker.classList.remove("bounce");
       void els.marker.offsetWidth;
       els.marker.classList.add("bounce");
+    }
+
+    function resetBubbleToNeutral() {
+      if (!els.markerBubble) return;
+      els.markerBubble.classList.remove("forward", "backward", "flash", "pop");
+      els.markerBubble.classList.add("neutral");
     }
 
     function renderStarsCollection() {
@@ -1636,12 +1645,9 @@
         speak(fullMessage, newStreak);
         render();
         setTimeout(() => {
-          // reset highlight state so the next problem does NOT reveal the answer
-          state.justAnsweredCorrectly = false;
-          state.problem = makeProblem();
-          state.markerValue = state.problem.a;
-          render();
-        }, 10000);
+          // move cleanly to the next problem and reset marker/bubble state
+          newProblem();
+        }, 5000);
       } else {
         state.justAnsweredCorrectly = false;
         state.streak = 0;
@@ -1659,6 +1665,9 @@
       state.stars = 0;
       state.problem = makeProblem();
       state.markerValue = state.problem.a;
+      state.lastSnapValue = state.markerValue;
+      state.prevMarkerValue = state.markerValue;
+      resetBubbleToNeutral()
       setMessage("Game reset. Drag the marker to solve on the number line.");
       render();
     }
@@ -1669,6 +1678,9 @@
       state.justAnsweredCorrectly = false;
       state.dragging = false;
       state.markerValue = state.problem.a;
+      state.lastSnapValue = state.markerValue;
+      state.prevMarkerValue = state.markerValue;
+      resetBubbleToNeutral()
       setMessage(`Start at ${state.problem.a}. ${state.problem.op === "+" ? `Jump forward ${state.problem.b}.` : `Jump back ${state.problem.b}.`}`);
       render();
     }
@@ -1791,6 +1803,9 @@ window.addEventListener("beforeunload", () => {
 
     state.problem = makeProblem();
     state.markerValue = state.problem.a;
+    state.lastSnapValue = state.markerValue;
+    state.prevMarkerValue = state.markerValue;
+    resetBubbleToNeutral();
     setMessage("Drag the marker to the correct answer on the number line.");
     render();
   </script>
