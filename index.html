@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1057,6 +1056,7 @@
       countTargetValue: null,
       countAnimationTimer: null,
       activeStepValue: null,
+      nextQuestionTimer: null,
     };
 
     const els = {
@@ -1202,6 +1202,13 @@
       state.activeStepValue = null;
     }
 
+    function clearNextQuestionTimer() {
+      if (state.nextQuestionTimer) {
+        clearTimeout(state.nextQuestionTimer);
+        state.nextQuestionTimer = null;
+      }
+    }
+
     function animateMarkerToValue(targetValue) {
       stopCountAnimation();
       const clampedTarget = clampValue(targetValue);
@@ -1252,6 +1259,8 @@
     }
 
     function toggleBrickValue(value) {
+      clearNextQuestionTimer();
+      state.justAnsweredCorrectly = false;
       // start pulse when learner interacts via the frame tiles
       els.checkButton.classList.add("pulse");
       state.justAnsweredCorrectly = false;
@@ -1282,6 +1291,7 @@
 
     function swapProblemStart() {
       if (!canSwapProblem()) return;
+      clearNextQuestionTimer();
       stopCountAnimation();
       state.justAnsweredCorrectly = false;
       state.problem = {
@@ -1292,6 +1302,8 @@
       };
       state.markerValue = state.problem.a;
       state.lastSnapValue = state.markerValue;
+      state.prevMarkerValue = state.markerValue;
+      resetBubbleToNeutral();
       els.checkButton.classList.add("pulse");
       setMessage(`Now start at ${state.problem.a} and jump forward ${state.problem.b}.`, true);
       render();
@@ -1508,11 +1520,12 @@
       if (bubble) {
         if (state.prevMarkerValue !== state.markerValue) {
           const dir = state.prevMarkerValue == null ? 0 : (state.markerValue > state.prevMarkerValue ? 1 : -1);
-          bubble.classList.remove("pop","flash","forward","backward");
+          bubble.classList.remove("pop", "flash", "forward", "backward", "neutral");
           void bubble.offsetWidth;
           if (dir > 0) bubble.classList.add("forward");
-          if (dir < 0) bubble.classList.add("backward");
-          bubble.classList.add("pop","flash");
+          else if (dir < 0) bubble.classList.add("backward");
+          else bubble.classList.add("neutral");
+          bubble.classList.add("pop", "flash");
           state.prevMarkerValue = state.markerValue;
         }
         bubble.textContent = state.markerValue;
@@ -1531,6 +1544,7 @@
     }
 
     function newProblem(withMessage = "Try the next one!") {
+      clearNextQuestionTimer();
       stopCountAnimation();
       state.justAnsweredCorrectly = false;
       state.problem = makeProblem();
@@ -1543,6 +1557,8 @@
     }
 
     function updateFromPointer(clientX) {
+      clearNextQuestionTimer();
+      state.justAnsweredCorrectly = false;
       const rect = els.line.getBoundingClientRect();
       const relative = (clientX - rect.left) / rect.width;
       const newValue = clampValue(relative * 20);
@@ -1617,6 +1633,7 @@
     }
 
     function checkAnswer() {
+      clearNextQuestionTimer();
       // stop pulse once learner checks
       els.checkButton.classList.remove("pulse");
       stopCountAnimation();
@@ -1644,8 +1661,9 @@
         setMessage(fullMessage, true);
         speak(fullMessage, newStreak);
         render();
-        setTimeout(() => {
+        state.nextQuestionTimer = setTimeout(() => {
           // move cleanly to the next problem and reset marker/bubble state
+          state.nextQuestionTimer = null;
           newProblem();
         }, 5000);
       } else {
@@ -1658,6 +1676,7 @@
     }
 
     function resetGame() {
+      clearNextQuestionTimer();
       stopCountAnimation();
       state.justAnsweredCorrectly = false;
       state.streak = 0;
@@ -1673,6 +1692,7 @@
     }
 
     function moveMarkerToStart() {
+      clearNextQuestionTimer();
       stopCountAnimation();
       if (!state.problem) return;
       state.justAnsweredCorrectly = false;
@@ -1686,6 +1706,7 @@
     }
 
     els.line.addEventListener("pointerdown", (e) => {
+      clearNextQuestionTimer();
       stopCountAnimation();
       state.dragging = true;
       updateFromPointer(e.clientX);
@@ -1797,6 +1818,7 @@
 })();
 
 window.addEventListener("beforeunload", () => {
+      clearNextQuestionTimer();
       stopCountAnimation();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
     });
