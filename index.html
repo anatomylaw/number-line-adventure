@@ -281,6 +281,24 @@
       touch-action: none;
     }
 
+    .marker-bubble {
+      margin-bottom: 6px;
+      padding: 6px 10px;
+      background: #0f172a;
+      color: white;
+      font-weight: 800;
+      border-radius: 999px;
+      font-size: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      min-width: 32px;
+      text-align: center;
+      transform-origin: center;
+    }
+
+    .marker-bubble.pop {
+      animation: bubblePop 220ms ease;
+    }
+
     .marker.dragging { cursor: grabbing; }
 
     /* Soft glow to help track the marker while dragging (ADHD-friendly visual cue) */
@@ -678,6 +696,23 @@
       animation: answerPulse 1s ease-in-out infinite;
     }
 
+    .tick.current-marker .tick-mark,
+    .tick.current-marker .tick-label {
+      color: #0f172a;
+      background: #fde68a;
+    }
+
+    .tick.current-marker .tick-mark {
+      width: 5px;
+      box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.22);
+    }
+
+    .tick.current-marker .tick-label {
+      padding: 2px 8px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(251, 191, 36, 0.18);
+    }
+
     body.focus-mode aside,
     body.focus-mode .hint,
     body.focus-mode .jumps,
@@ -706,6 +741,12 @@
       0% { transform: scale(1); }
       40% { transform: scale(1.18); }
       100% { transform: scale(1); }
+    }
+
+    @keyframes bubblePop {
+      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(251,191,36,0.0); }
+      50% { transform: scale(1.18); box-shadow: 0 0 0 8px rgba(251,191,36,0.18); }
+      100% { transform: scale(1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     }
 
     @keyframes pop {
@@ -806,6 +847,7 @@
               <div class="line-track"></div>
               <div class="line-fill" id="lineFill"></div>
               <div class="marker" id="marker">
+                <div class="marker-bubble" id="markerBubble">0</div>
                 <div class="star">⭐</div>
                 <div class="stem"></div>
               </div>
@@ -956,6 +998,7 @@
     };
 
     const state = {
+      prevMarkerValue: null,
       lastSnapValue: null,
       problem: null,
       markerValue: 0,
@@ -1248,6 +1291,11 @@
         if (state.problem) {
           if (i === state.problem.a) tick.classList.add("start-focus");
 
+          /* Emphasize the number the marker is currently on */
+          if (i === state.markerValue) {
+            tick.classList.add("current-marker");
+          }
+
           /* Only highlight the answer AFTER a correct response
              so the answer is not revealed ahead of time */
           if (state.justAnsweredCorrectly && i === state.problem.answer) {
@@ -1376,7 +1424,9 @@
         });
 
         els.frameGrid.appendChild(cell);
-      }      els.frameSummary.textContent = `${state.markerValue} shown with alternating grey and red groups of five, linked to the number line.`;
+      }
+
+      els.frameSummary.textContent = `${state.markerValue} shown with alternating grey and red groups of five, linked to the number line.`;
     }
 
     function render() {
@@ -1400,6 +1450,16 @@
       });
       els.lineFill.style.width = `${valueToPercent(state.markerValue)}%`;
       els.marker.style.left = `${valueToPercent(state.markerValue)}%`;
+      const bubble = document.getElementById("markerBubble");
+      if (bubble) {
+        if (state.prevMarkerValue !== state.markerValue) {
+          bubble.classList.remove("pop");
+          void bubble.offsetWidth;
+          bubble.classList.add("pop");
+          state.prevMarkerValue = state.markerValue;
+        }
+        bubble.textContent = state.markerValue;
+      }
       els.marker.classList.toggle("dragging", state.dragging);
       renderStarsCollection();
       els.streakCount.textContent = state.streak;
