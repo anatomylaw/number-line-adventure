@@ -163,9 +163,18 @@
       background: #eff6ff;
       border: 1px solid #bfdbfe;
       color: #1e3a8a;
-      text-align: left;
-      font-size: 15px;
-      font-weight: 700;
+      text-align: center;
+      font-size: 20px; /* larger, more readable */
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .decomposition-helper.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .decomposition-line + .decomposition-line {
@@ -890,7 +899,7 @@
               <span id="swapButtonText">Swap start and steps</span>
             </button>
           </div>
-          <div class="decomposition-helper" id="decompositionHelper" style="display:none;"></div>
+          
         </div>
 
         <div class="section">
@@ -913,6 +922,8 @@
               </div>
             </div>
           </div>
+
+          <div class="decomposition-helper" id="decompositionHelper" style="display:none; margin-top:12px;"></div>
 
           <div class="hint" id="jumpHint"></div>
 
@@ -1423,26 +1434,25 @@
 
     function getDecompositionLines(problem) {
       if (!problem) return [];
-      const lines = [];
 
-      if (problem.a > 10) {
-        lines.push(`${problem.a} = 10 + ${problem.a - 10}`);
-      }
-      if (problem.b > 10) {
-        lines.push(`${problem.b} = 10 + ${problem.b - 10}`);
-      }
-
+      // Only return a single clean numeric decomposition equation
       if (problem.op === "+" && problem.b > 10) {
-        lines.push(`Try: <span class="decomposition-inline">${problem.a} + 10 + ${problem.b - 10}</span>`);
-      } else if (problem.op === "+" && problem.a > 10) {
-        lines.push(`Try: <span class="decomposition-inline">10 + ${problem.a - 10} + ${problem.b}</span>`);
-      } else if (problem.op === "−" && problem.b > 10) {
-        lines.push(`Try: <span class="decomposition-inline">${problem.a} − 10 − ${problem.b - 10}</span>`);
-      } else if (problem.op === "−" && problem.a > 10) {
-        lines.push(`Start at <span class="decomposition-inline">10 + ${problem.a - 10}</span>, then subtract ${problem.b}.`);
+        return [`${problem.a} + 10 + ${problem.b - 10}`];
       }
 
-      return lines;
+      if (problem.op === "+" && problem.a > 10) {
+        return [`10 + ${problem.a - 10} + ${problem.b}`];
+      }
+
+      if (problem.op === "−" && problem.b > 10) {
+        return [`${problem.a} − 10 − ${problem.b - 10}`];
+      }
+
+      if (problem.op === "−" && problem.a > 10) {
+        return [`10 + ${problem.a - 10} − ${problem.b}`];
+      }
+
+      return [];
     }
 
     function jumpText() {
@@ -1624,6 +1634,7 @@
     }
 
     function render() {
+      if (!state.problem) return;
       els.exitFocusBtn.style.display = state.focusMode ? "block" : "none";
       document.body.classList.toggle("focus-mode", state.focusMode);
       renderTicks();
@@ -1641,13 +1652,16 @@
         : "Swap start and steps";
       const decompositionLines = getDecompositionLines(state.problem);
       if (decompositionLines.length > 0) {
+        els.decompositionHelper.classList.remove("visible");
         els.decompositionHelper.style.display = "block";
-        els.decompositionHelper.innerHTML = decompositionLines
-          .map(line => `<div class="decomposition-line">${line}</div>`)
-          .join("");
+        els.decompositionHelper.textContent = decompositionLines[0];
+        requestAnimationFrame(() => {
+          els.decompositionHelper.classList.add("visible");
+        });
       } else {
+        els.decompositionHelper.classList.remove("visible");
+        els.decompositionHelper.textContent = "";
         els.decompositionHelper.style.display = "none";
-        els.decompositionHelper.innerHTML = "";
       }
 
       [els.fiveModeBtn, els.fiveModeBtnSide].forEach(btn => btn.classList.toggle("active", state.frameMode === "five"));
