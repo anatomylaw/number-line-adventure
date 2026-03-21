@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1037,6 +1036,7 @@
     };
 
     const state = {
+      inputLocked: false,
       prevMarkerValue: null,
       lastSnapValue: null,
       problem: null,
@@ -1279,6 +1279,13 @@
       }
     }
 
+    function unlockCheckInput() {
+      state.inputLocked = false;
+      if (els.checkButton) {
+        els.checkButton.disabled = false;
+      }
+    }
+
     function animateMarkerToValue(targetValue) {
       stopCountAnimation();
       const clampedTarget = clampValue(targetValue);
@@ -1330,6 +1337,7 @@
 
     function toggleBrickValue(value) {
       clearNextQuestionTimer();
+      unlockCheckInput();
       state.justAnsweredCorrectly = false;
       // start pulse when learner interacts via the frame tiles
       els.checkButton.classList.add("pulse");
@@ -1362,6 +1370,7 @@
     function swapProblemStart() {
       if (!canSwapProblem()) return;
       clearNextQuestionTimer();
+      unlockCheckInput();
       stopCountAnimation();
       state.justAnsweredCorrectly = false;
       state.problem = {
@@ -1614,6 +1623,7 @@
     }
 
     function newProblem(withMessage = "Try the next one!") {
+      unlockCheckInput();
       clearNextQuestionTimer();
       stopCountAnimation();
       state.justAnsweredCorrectly = false;
@@ -1628,6 +1638,7 @@
 
     function updateFromPointer(clientX) {
       clearNextQuestionTimer();
+      unlockCheckInput();
       state.justAnsweredCorrectly = false;
       const rect = els.line.getBoundingClientRect();
       const relative = (clientX - rect.left) / rect.width;
@@ -1703,11 +1714,14 @@
     }
 
     function checkAnswer() {
+      if (state.inputLocked) return;
       clearNextQuestionTimer();
       // stop pulse once learner checks
       els.checkButton.classList.remove("pulse");
       stopCountAnimation();
       if (state.markerValue === state.problem.answer) {
+        state.inputLocked = true;
+        els.checkButton.disabled = true;
         const newStreak = state.streak + 1;
         const praise = getPraise(newStreak);
         const earned = getStarsForStreak(newStreak);
@@ -1732,6 +1746,7 @@
         speak(fullMessage, newStreak);
         render();
         state.nextQuestionTimer = setTimeout(() => {
+          unlockCheckInput();
           // move cleanly to the next problem and reset marker/bubble state
           state.nextQuestionTimer = null;
           newProblem();
@@ -1747,6 +1762,7 @@
 
     function resetGame() {
       clearNextQuestionTimer();
+      unlockCheckInput();
       stopCountAnimation();
       state.justAnsweredCorrectly = false;
       state.streak = 0;
@@ -1765,6 +1781,7 @@
 
     function moveMarkerToStart() {
       clearNextQuestionTimer();
+      unlockCheckInput();
       stopCountAnimation();
       if (!state.problem) return;
       state.justAnsweredCorrectly = false;
