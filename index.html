@@ -156,6 +156,27 @@
       box-shadow: var(--shadow-sm);
     }
 
+    .decomposition-helper {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+      text-align: left;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .decomposition-line + .decomposition-line {
+      margin-top: 6px;
+    }
+
+    .decomposition-inline {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
     .swap-btn {
       display: inline-flex;
       align-items: center;
@@ -869,6 +890,7 @@
               <span id="swapButtonText">Swap start and steps</span>
             </button>
           </div>
+          <div class="decomposition-helper" id="decompositionHelper" style="display:none;"></div>
         </div>
 
         <div class="section">
@@ -1067,6 +1089,7 @@
       problemText: document.getElementById("problemText"),
       swapStartButton: document.getElementById("swapStartButton"),
       swapButtonText: document.getElementById("swapButtonText"),
+      decompositionHelper: document.getElementById("decompositionHelper"),
       startButton: document.getElementById("startButton"),
       line: document.getElementById("numberLine"),
       lineFill: document.getElementById("lineFill"),
@@ -1398,7 +1421,37 @@
       render();
     }
 
+    function getDecompositionLines(problem) {
+      if (!problem) return [];
+      const lines = [];
+
+      if (problem.a > 10) {
+        lines.push(`${problem.a} = 10 + ${problem.a - 10}`);
+      }
+      if (problem.b > 10) {
+        lines.push(`${problem.b} = 10 + ${problem.b - 10}`);
+      }
+
+      if (problem.op === "+" && problem.b > 10) {
+        lines.push(`Try: <span class="decomposition-inline">${problem.a} + 10 + ${problem.b - 10}</span>`);
+      } else if (problem.op === "+" && problem.a > 10) {
+        lines.push(`Try: <span class="decomposition-inline">10 + ${problem.a - 10} + ${problem.b}</span>`);
+      } else if (problem.op === "−" && problem.b > 10) {
+        lines.push(`Try: <span class="decomposition-inline">${problem.a} − 10 − ${problem.b - 10}</span>`);
+      } else if (problem.op === "−" && problem.a > 10) {
+        lines.push(`Start at <span class="decomposition-inline">10 + ${problem.a - 10}</span>, then subtract ${problem.b}.`);
+      }
+
+      return lines;
+    }
+
     function jumpText() {
+      if (state.problem.op === "+" && state.problem.b > 10) {
+        return `Start at ${state.problem.a}, then jump forward 10 and forward ${state.problem.b - 10}.`;
+      }
+      if (state.problem.op === "−" && state.problem.b > 10) {
+        return `Start at ${state.problem.a}, then jump back 10 and back ${state.problem.b - 10}.`;
+      }
       return state.problem.op === "+"
         ? `Start at ${state.problem.a}, then jump forward ${state.problem.b}.`
         : `Start at ${state.problem.a}, then jump back ${state.problem.b}.`;
@@ -1586,6 +1639,16 @@
       els.swapButtonText.textContent = canSwapProblem()
         ? `Swap ${state.problem.a} and ${state.problem.b}`
         : "Swap start and steps";
+      const decompositionLines = getDecompositionLines(state.problem);
+      if (decompositionLines.length > 0) {
+        els.decompositionHelper.style.display = "block";
+        els.decompositionHelper.innerHTML = decompositionLines
+          .map(line => `<div class="decomposition-line">${line}</div>`)
+          .join("");
+      } else {
+        els.decompositionHelper.style.display = "none";
+        els.decompositionHelper.innerHTML = "";
+      }
 
       [els.fiveModeBtn, els.fiveModeBtnSide].forEach(btn => btn.classList.toggle("active", state.frameMode === "five"));
       [els.tenModeBtn, els.tenModeBtnSide].forEach(btn => btn.classList.toggle("active", state.frameMode === "ten"));
