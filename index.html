@@ -480,22 +480,27 @@
 
     .frame-grid.counting-enabled .frame-cell.can-toggle {
       cursor: pointer;
-      box-shadow: 0 0 0 2px rgba(125, 211, 252, 0.18);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.28), 0 0 0 7px rgba(125, 211, 252, 0.18);
+      border-color: #60a5fa;
     }
 
     .frame-grid.counting-enabled .frame-cell.can-toggle:hover {
       transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.36), 0 0 0 9px rgba(125, 211, 252, 0.22);
+      border-color: #2563eb;
     }
 
     .frame-grid.counting-enabled .frame-cell.can-toggle:active {
       transform: scale(0.95);
-      box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.35);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.3), 0 0 0 8px rgba(125, 211, 252, 0.2);
+      border-color: #1d4ed8;
     }
 
     .frame-grid.counting-enabled .frame-cell.is-disabled {
       cursor: default;
       opacity: 0.96;
       box-shadow: none;
+      border-color: #d1d5db;
     }
 
     .frame-grid.counting-enabled .frame-cell.active-step {
@@ -1611,21 +1616,11 @@
           cell.classList.add("active-step");
         }
 
-        let lastBrickActivation = 0;
-        const handleBrickTap = (event) => {
-          if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          const now = Date.now();
-          if (now - lastBrickActivation < 250) return;
-          lastBrickActivation = now;
-          toggleBrickValue(value);
-        };
-
-        cell.addEventListener("pointerup", handleBrickTap);
-        cell.addEventListener("touchend", handleBrickTap);
-        cell.addEventListener("click", handleBrickTap);
+        if (canToggle) {
+          bindTap(cell, () => {
+            toggleBrickValue(value);
+          });
+        }
 
         els.frameGrid.appendChild(cell);
       }
@@ -1891,6 +1886,7 @@
 
     const bindTap = (element, handler, options = {}) => {
       let lastActivation = 0;
+      let ignoreClickUntil = 0;
       const clearPress = () => {
         if (options.pressClass) {
           element.classList.remove(options.pressClass);
@@ -1903,8 +1899,12 @@
           event.stopPropagation();
         }
         const now = Date.now();
-        if (now - lastActivation < 300) return;
+        if (event && event.type === "click" && now < ignoreClickUntil) return;
+        if (now - lastActivation < 350) return;
         lastActivation = now;
+        if (event && (event.type === "touchend" || event.type === "pointerup")) {
+          ignoreClickUntil = now + 500;
+        }
         clearPress();
         handler(event);
       };
